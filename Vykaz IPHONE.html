@@ -802,6 +802,7 @@
             <textarea id="odkaz-text" placeholder="Popis odkazu..." style="padding-right:44px;"></textarea>
             <button type="button" onclick="startVoice('odkaz-text')" id="mic-odkaz" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--text2);font-size:32px;">🎤</button>
           </div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px;">Na iPhone použij 🎤 na klávesnici</div>
         </div>
       </div>
 
@@ -821,6 +822,7 @@
             <textarea id="individ-text" placeholder="Popis poradenství..." style="padding-right:44px;"></textarea>
             <button type="button" onclick="startVoice('individ-text')" id="mic-individ" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--text2);font-size:32px;">🎤</button>
           </div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px;">Na iPhone použij 🎤 na klávesnici</div>
         </div>
       </div>
 
@@ -866,6 +868,7 @@
             <textarea id="predavk-text" placeholder="Popis situace..." style="padding-right:44px;"></textarea>
             <button type="button" onclick="startVoice('predavk-text')" id="mic-predavk" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--text2);font-size:32px;">🎤</button>
           </div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px;">Na iPhone použij 🎤 na klávesnici</div>
         </div>
       </div>
 
@@ -1038,7 +1041,7 @@
 <script>
 function startVoice(fieldId) {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    showToast('Hlasový vstup není podporován v tomto prohlížeči.');
+    showToast('Na iPhone použij 🎤 na klávesnici pro hlasový vstup.');
     return;
   }
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;

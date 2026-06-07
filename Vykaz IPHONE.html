@@ -1535,37 +1535,58 @@ async function processScan() {
   try {
 
 
-    // === PRŮCHOD 1: Pohlaví, typ, OUT, PK ===
-    btn.textContent = '⏳ Průchod 1/2...';
-    const prompt1 = `Toto je papírový výkaz harm reduction. Soustřeď se POUZE na první 4 sloupce tabulky.
+    // === PRŮCHOD 1: Pohlaví, typ kontaktu, OUT, PK ===
+    btn.textContent = '⏳ Průchod 1/4 — základní údaje...';
+    const prompt1 = `Toto je papírový výkaz harm reduction. Soustřeď se POUZE na první 4 sloupce tabulky. Ignoruj vše ostatní včetně legendy dole.
 
 SLOUPEC 1 - Č.Ř.: číslo řádku.
-- Pokud je PŘED číslem řádku symbol "+" nebo je číslo zakroužkované → typ="Opakovaný"
-- Pokud je v sloupci M/Ž/ODM napsáno "ODM" → typ="Odmítnutý"  
-- Jinak → typ="Klient"
+DŮLEŽITÉ pro typ kontaktu:
+- Pokud je PŘED číslem řádku symbol "+" (vlevo od čísla v prvním sloupci) → typ="Opakovaný"
+- Pokud je číslo řádku zakroužkované → typ="Opakovaný"
+- Pokud je v sloupci 2 napsáno "ODM" → typ="Odmítnutý"
+- Ve všech ostatních případech → typ="Klient"
 
 SLOUPEC 2 - M/Ž/ODM: M nebo m → "M", Ž nebo ž → "Ž"
+SLOUPEC 3 - OUT: číslo injekčních stříkaček. Prázdné = 0. NEPLÉST s HR sloupcem!
+SLOUPEC 4 - PK: fajfka/v/u/✓ = true. Prázdné = false.
 
-SLOUPEC 3 - OUT: číslo vydaných stříkaček. Pokud prázdné nebo pomlčka → 0. Pozor: tento sloupec bývá většinou prázdný, nezaměňuj ho za HR!
-
-SLOUPEC 4 - PK: fajfka, v, u, ✓ = true. Prázdné = false.
-
-Ignoruj sloupce 5 a dále. Ignoruj legendu dole na stránce.
-Zpracuj každý řádek PRÁVĚ JEDNOU. Počet objektů = počet řádků v tabulce.
+Zpracuj každý řádek PRÁVĚ JEDNOU.
 Vrať POUZE JSON pole bez markdown:
 [{"pohlavi":"M","typ":"Klient","out":0,"pk":false}]`;
 
     const pass1 = await callAPI(prompt1);
 
-    // === PRŮCHOD 2: HR, Info, fajfky, drogy ===
-    btn.textContent = '⏳ Průchod 2/2...';
-    const prompt2 = `Toto je papírový výkaz harm reduction. Soustřeď se POUZE na sloupce 5-16.
+    // === PRŮCHOD 2: HR materiál ===
+    btn.textContent = '⏳ Průchod 2/4 — HR materiál...';
+    const prompt2 = `Toto je papírový výkaz harm reduction. Soustřeď se POUZE na 5. sloupec zleva — sloupec HR (hned za sloupcem PK).
 
-SLOUPEC 5 - HR: obsahuje čísla (1-9). Čísla převeď: 1=Leták, 2=Kondomy, 3=Špunty, 4=Filtry, 5=Šňupátka/Kapsle, 6=Vitamíny/Voda, 7=Mat. k i.v. aplik., 8=Žvýkačky, 9=Jiný. Příklad: "1,3" → ["Leták","Špunty"], "6" → ["Vitamíny/Voda"].
+Sloupec HR obsahuje čísla 1-9. Každé číslo znamená:
+1=Leták, 2=Kondomy, 3=Špunty, 4=Filtry, 5=Šňupátka/Kapsle, 6=Vitamíny/Voda, 7=Mat. k i.v. aplik., 8=Žvýkačky, 9=Jiný
 
-SLOUPEC 6 - Info: obsahuje čísla (1-8). Čísla převeď: 1=Bezpečnější užívání, 2=Bezpečný sex, 3=Vitamíny/Dehydratace, 4=Ochrana sluchu, 5=Alko/Tono/CO info, 6=Bezpečná přeprava, 7=Další zdrav./soc., 8=Jiné. Příklad: "8" → ["Jiné"].
+Příklady: "1,3" → ["Leták","Špunty"], "6" → ["Vitamíny/Voda"], prázdné → []
+IGNORUJ všechny ostatní sloupce. IGNORUJ legendu dole.
+Vrať POUZE JSON pole bez markdown:
+[{"hr":[]}]`;
 
-POZOR: HR a Info jsou DVA RŮZNÉ sloupce. HR je vlevo od Info. Neplést!
+    const pass2 = await callAPI(prompt2);
+
+    // === PRŮCHOD 3: Info servis ===
+    btn.textContent = '⏳ Průchod 3/4 — Info servis...';
+    const prompt3 = `Toto je papírový výkaz harm reduction. Soustřeď se POUZE na 6. sloupec zleva — sloupec Info (hned za sloupcem HR).
+
+Sloupec Info obsahuje čísla 1-8. Každé číslo znamená:
+1=Bezpečnější užívání, 2=Bezpečný sex, 3=Vitamíny/Dehydratace, 4=Ochrana sluchu, 5=Alko/Tono/CO info, 6=Bezpečná přeprava, 7=Další zdrav./soc., 8=Jiné
+
+Příklady: "8" → ["Jiné"], "1,8" → ["Bezpečnější užívání","Jiné"], prázdné → []
+IGNORUJ všechny ostatní sloupce včetně HR. IGNORUJ legendu dole.
+Vrať POUZE JSON pole bez markdown:
+[{"info":[]}]`;
+
+    const pass3 = await callAPI(prompt3);
+
+    // === PRŮCHOD 4: Fajfky + drogy ===
+    btn.textContent = '⏳ Průchod 4/4 — fajfky a drogy...';
+    const prompt4 = `Toto je papírový výkaz harm reduction. Soustřeď se POUZE na sloupce 7-16.
 
 SLOUPEC 7 - Odkaz do služby: fajfka=true, prázdné=false
 SLOUPEC 8 - Individ. Porad.: fajfka=true, prázdné=false
@@ -1576,23 +1597,26 @@ SLOUPEC 12 - Předávkování: fajfka=true, prázdné=false
 SLOUPEC 13 - Řešení akut. intox.: fajfka=true, prázdné=false
 SLOUPEC 14 - Zdrav. ošetření: fajfka=true, prázdné=false
 SLOUPEC 15 - Kontakt. práce: fajfka=true, prázdné=false (předposlední sloupec)
-SLOUPEC 16 - Primární drogy: ALK/Alko=Alkohol, TAB=Tabák, THC=THC, MDMA/EXT=Extáze, KOK=Kokain, MEF=Mefedron, SPE=Speed, LSD=LSD, PER/PERV=Pervitin, POP=Poppers, HER=Heroin, KRA=Kratom, KET=Ketamin
+SLOUPEC 16 - Primární drogy: ALK/Alko=Alkohol, TAB=Tabák, THC=THC, MDMA/EXT=Extáze, KOK=Kokain, MEF=Mefedron/Katinony, SPE=Speed, LSD=LSD, PER/PERV=Pervitin, POP=Poppers, HER=Heroin, KRA=Kratom, KET=Ketamin, LEK=Léky na předpis
 
-Ignoruj legendu dole na stránce. Zpracuj každý řádek PRÁVĚ JEDNOU.
+IGNORUJ sloupce 1-6. IGNORUJ legendu dole.
 Vrať POUZE JSON pole bez markdown:
-[{"hr":[],"info":[],"odkaz":false,"individ":false,"alkotest":false,"tonometr":false,"testy":false,"predavk":false,"intox":false,"zdrav":false,"kontprace":false,"drogy":[],"drogyJine":""}]`;
+[{"odkaz":false,"individ":false,"alkotest":false,"tonometr":false,"testy":false,"predavk":false,"intox":false,"zdrav":false,"kontprace":false,"drogy":[],"drogyJine":""}]`;
 
-    const pass2 = await callAPI(prompt2);
+    const pass4 = await callAPI(prompt4);
 
-    // Sloučení výsledků
+    // Sloučení všech průchodů
     scannedRecords = pass1.map((r, i) => ({
       ...r,
-      ...(pass2[i] || {}),
+      hr: (pass2[i] || {}).hr || [],
+      info: (pass3[i] || {}).info || [],
+      ...(pass4[i] || {}),
       odkazText: '', individText: '', predavkText: '',
       id: Date.now().toString() + i,
       ts: new Date().toISOString()
     }));
 
+    renderScanResults();
     renderScanResults();
     document.getElementById('scan-result-section').style.display = 'block';
 

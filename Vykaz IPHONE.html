@@ -601,7 +601,11 @@
     </div>
     <div class="form-group">
       <label>Pracovníci (celé jméno na řádek)</label>
-      <textarea id="start-workers" rows="3" placeholder="Zwerkie&#10;Matlafousek&#10;..."></textarea>
+      <textarea id="start-workers" rows="3" placeholder="např. Matlafousek Veselý&#10;..."></textarea>
+    </div>
+    <div class="form-group" style="display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;">
+      <input type="checkbox" id="awareness" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;">
+      <label for="awareness" style="cursor:pointer;font-size:14px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin:0;">AWARENESS</label>
     </div>
     <button class="btn btn-primary" onclick="startNewAction()">✦ Spustit novou akci</button>
 
@@ -730,7 +734,10 @@
         </div>
         <div class="conditional-field" id="odkaz-detail">
           <label>Kam byl klient odkázán?</label>
-          <textarea id="odkaz-text" placeholder="Popis odkazu..."></textarea>
+          <div style="position:relative;">
+            <textarea id="odkaz-text" placeholder="Popis odkazu..." style="padding-right:44px;"></textarea>
+            <button type="button" onclick="startVoice('odkaz-text')" id="mic-odkaz" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--text2);font-size:32px;">🎤</button>
+          </div>
         </div>
       </div>
 
@@ -746,7 +753,10 @@
         </div>
         <div class="conditional-field" id="individ-detail">
           <label>Popis poradenství</label>
-          <textarea id="individ-text" placeholder="Popis poradenství..."></textarea>
+          <div style="position:relative;">
+            <textarea id="individ-text" placeholder="Popis poradenství..." style="padding-right:44px;"></textarea>
+            <button type="button" onclick="startVoice('individ-text')" id="mic-individ" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--text2);font-size:32px;">🎤</button>
+          </div>
         </div>
       </div>
 
@@ -788,13 +798,16 @@
         </div>
         <div class="conditional-field" id="predavk-detail">
           <label>Detaily předávkování</label>
-          <textarea id="predavk-text" placeholder="Popis situace..."></textarea>
+          <div style="position:relative;">
+            <textarea id="predavk-text" placeholder="Popis situace..." style="padding-right:44px;"></textarea>
+            <button type="button" onclick="startVoice('predavk-text')" id="mic-predavk" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--text2);font-size:32px;">🎤</button>
+          </div>
         </div>
       </div>
 
-      <!-- SEKCE 13-15 -->
+      <!-- SEKCE 13-14 -->
       <div class="form-section">
-        <div class="form-section-title">13–15 — Intervence</div>
+        <div class="form-section-title">13–14 — Intervence</div>
         <div class="toggle-row">
           <span class="toggle-label-text">Řešení akutní intoxikace</span>
           <div class="toggle-btns">
@@ -809,7 +822,12 @@
             <button class="toggle-btn no active" id="zdrav-no" onclick="toggleField('zdrav','no')">Ne</button>
           </div>
         </div>
-        <div class="toggle-row">
+      </div>
+
+      <!-- SEKCE 15: Kontaktní práce -->
+      <div class="form-section">
+        <div class="form-section-title">15 — Kontaktní práce</div>
+        <div class="toggle-row" style="border:none;padding:0;">
           <span class="toggle-label-text">Kontaktní práce</span>
           <div class="toggle-btns">
             <button class="toggle-btn yes" id="kontprace-yes" onclick="toggleField('kontprace','yes')">Ano</button>
@@ -906,6 +924,33 @@
 <div id="toast" class="toast"></div>
 
 <script>
+function startVoice(fieldId) {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    showToast('Hlasový vstup není podporován v tomto prohlížeči.');
+    return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SR();
+  recognition.lang = 'cs-CZ';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  const micId = 'mic-' + fieldId.replace('-text', '');
+  const btn = document.getElementById(micId);
+  if (btn) { btn.textContent = '⏹'; btn.style.color = 'var(--accent3)'; btn.style.borderColor = 'var(--accent3)'; }
+
+  recognition.onresult = (e) => {
+    const transcript = e.results[0][0].transcript;
+    const field = document.getElementById(fieldId);
+    field.value = (field.value ? field.value + ' ' : '') + transcript;
+  };
+  recognition.onerror = () => { showToast('Hlasový vstup se nezdařil.'); };
+  recognition.onend = () => {
+    if (btn) { btn.textContent = '🎤'; btn.style.color = ''; btn.style.borderColor = ''; }
+  };
+  recognition.start();
+}
+
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -991,7 +1036,9 @@ function startNewAction() {
     showToast('Vyplň údaje o akci.');
     return;
   }
-  currentAction = { id: Date.now().toString(), name, date, place, workers, records: [] };
+  const awareness = document.getElementById('awareness').checked;
+  const finalName = awareness ? 'AWA - ' + name : name;
+  currentAction = { id: Date.now().toString(), name: finalName, date, place, workers, records: [] };
   records = [];
   saveCurrentAction();
   showApp();
@@ -1043,6 +1090,14 @@ function switchTab(tab) {
 
 // ===== TOGGLE FIELDS =====
 function toggleField(field, val) {
+  // Prevent prvokontakt = yes when typ = Opakovaný
+  if (field === 'pk' && val === 'yes') {
+    const typ = document.querySelector('input[name="typ"]:checked');
+    if (typ && typ.value === 'Opakovaný') {
+      showToast('Opakovaný kontakt nemůže být prvokontakt.');
+      return;
+    }
+  }
   toggleStates[field] = val;
   document.getElementById(field+'-yes').classList.toggle('active', val === 'yes');
   document.getElementById(field+'-no').classList.toggle('active', val === 'no');
@@ -1133,7 +1188,7 @@ function saveRecord() {
     return;
   }
   if (r.typ !== 'Odmítnutý') {
-    const hasSomething = r.out > 0 || r.pk || r.hr.length > 0 || r.info.length > 0 ||
+    const hasSomething = r.out > 0 || r.hr.length > 0 || r.info.length > 0 ||
       r.odkaz || r.individ || r.alkotest || r.tonometr || r.testy ||
       r.predavk || r.intox || r.zdrav || r.kontprace;
     if (!hasSomething) {

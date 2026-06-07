@@ -1380,6 +1380,65 @@ function saveApiKey() {
   showToast('API klíč uložen.');
 }
 
+function renderScanResults() {
+  const container = document.getElementById('scan-result-content');
+  container.innerHTML = `<div style="color:var(--text2);font-size:13px;margin-bottom:12px;">Rozpoznáno <strong style="color:var(--accent)">${scannedRecords.length}</strong> záznamů. Zkontroluj je před importem.</div>` +
+    scannedRecords.map((r, i) => {
+      const drogy = r.drogy && r.drogy.length ? r.drogy.join(', ') : '—';
+      const hr = r.hr && r.hr.length ? r.hr.join(', ') : '—';
+      const info = r.info && r.info.length ? r.info.join(', ') : '—';
+      return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <strong>${i+1}. ${r.pohlavi} — ${r.typ}</strong>
+          ${r.pk ? '<span class="td-chip yellow">PK</span>' : ''}
+          ${r.out ? '<span class="td-chip">OUT: '+r.out+'</span>' : ''}
+          ${r.kontprace ? '<span class="td-chip green">Kont. práce</span>' : ''}
+        </div>
+        ${hr !== '—' ? `<div style="color:var(--text2);">HR: ${hr}</div>` : ''}
+        ${info !== '—' ? `<div style="color:var(--text2);">Info: ${info}</div>` : ''}
+        ${drogy !== '—' ? `<div style="color:var(--text2);">Drogy: ${drogy}</div>` : ''}
+      </div>`;
+    }).join('');
+}
+
+function importScanRecords() {
+  const DRUGS_KEYS = ['alkohol','tabak','thc','extaze','kokain','mefedron','speed','lsd','lysohlavky','pervitin','poppers','heroin','kratom','ketamin','leky','kanabinoidy','jine'];
+  const DRUG_LABELS_ALL = ['Alkohol','Tabák','THC','Extáze','Kokain','Mefedron/Katinony','Speed','LSD','Lysohlávky','Pervitin','Poppers','Heroin','Kratom','Ketamin','Léky na předpis','Další kanabinoidy','Jiné'];
+
+  const selectEl = document.getElementById('scan-action-select');
+  const selectedId = selectEl ? selectEl.value : '';
+
+  const newRecords = scannedRecords.map(r => {
+    const drogyKeys = (r.drogy || []).map(d => {
+      const idx = DRUG_LABELS_ALL.findIndex(l => l.toLowerCase().includes(d.toLowerCase()) || d.toLowerCase().includes(l.toLowerCase()));
+      return idx >= 0 ? DRUGS_KEYS[idx] : null;
+    }).filter(Boolean);
+    return { ...r, drogy: drogyKeys, id: Date.now().toString() + Math.random(), ts: new Date().toISOString() };
+  });
+
+  if (selectedId) {
+    const actions = getActions();
+    const idx = actions.findIndex(a => a.id === selectedId);
+    if (idx >= 0) {
+      actions[idx].records = [...(actions[idx].records || []), ...newRecords];
+      saveActions(actions);
+      showToast(`✓ Importováno ${newRecords.length} záznamů do akce "${actions[idx].name}".`);
+    }
+  } else if (currentAction) {
+    records.push(...newRecords);
+    saveCurrentAction();
+    updateCount();
+    showToast(`✓ Importováno ${newRecords.length} záznamů.`);
+  } else {
+    showToast('Vyber akci pro import.');
+    return;
+  }
+
+  document.getElementById('scan-result-section').style.display = 'none';
+  scanImageBase64 = null;
+  document.getElementById('scan-preview-section').style.display = 'none';
+  document.getElementById('scan-file-input').value = '';
+}
 function handleScanDrop(e) {
   e.preventDefault();
   document.getElementById('scan-drop-zone').style.borderColor = '';

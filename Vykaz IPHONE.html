@@ -1413,7 +1413,22 @@ function importScanRecords() {
       const idx = DRUG_LABELS_ALL.findIndex(l => l.toLowerCase().includes(d.toLowerCase()) || d.toLowerCase().includes(l.toLowerCase()));
       return idx >= 0 ? DRUGS_KEYS[idx] : null;
     }).filter(Boolean);
-    return { ...r, drogy: drogyKeys, id: Date.now().toString() + Math.random(), ts: new Date().toISOString() };
+
+    // Převod HR čísel na názvy
+    const hrLabels = ['Leták','Kondomy','Špunty','Filtry','Šňupátka/Kapsle','Vitamíny/Voda','Mat. k i.v. aplik.','Žvýkačky','Jiný'];
+    const hr = (r.hr || []).map(h => {
+      if (typeof h === 'number' || /^\d+$/.test(h)) return hrLabels[parseInt(h)-1] || h;
+      return h;
+    }).filter(Boolean);
+
+    // Převod Info čísel na názvy
+    const infoLabels = ['Bezpečnější užívání','Bezpečný sex','Vitamíny/Dehydratace','Ochrana sluchu','Alko/Tono/CO info','Bezpečná přeprava','Další zdrav./soc.','Jiné'];
+    const info = (r.info || []).map(i => {
+      if (typeof i === 'number' || /^\d+$/.test(i)) return infoLabels[parseInt(i)-1] || i;
+      return i;
+    }).filter(Boolean);
+
+    return { ...r, drogy: drogyKeys, hr, info, id: Date.now().toString() + Math.random(), ts: new Date().toISOString() };
   });
 
   if (selectedId) {
@@ -1529,7 +1544,7 @@ Formát každého záznamu:
         'anthropic-dangerous-direct-browser-access': 'true',
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
+        model: 'claude-sonnet-4-5-20250929',
         max_tokens: 8000,
         messages: [{
           role: 'user',

@@ -1146,6 +1146,7 @@ function goToScan() {
 }
 
 function startNewAction() {
+  const name = document.getElementById('start-name').value.trim();
   const date = document.getElementById('start-date').value;
   const place = document.getElementById('start-place').value.trim();
   const workers = document.getElementById('start-workers').value.trim();
@@ -1587,9 +1588,13 @@ Vrať POUZE JSON pole čísel bez markdown:
     // Převod čísel HR na názvy v kódu
     const hrLabels = ['Leták','Kondomy','Špunty','Filtry','Šňupátka/Kapsle','Vitamíny/Voda','Mat. k i.v. aplik.','Žvýkačky','Jiný'];
     const pass2 = pass2raw.map(r => ({
-      hr: (r.hr || []).map(n => {
-        const num = parseInt(n);
-        return (num >= 1 && num <= 9) ? hrLabels[num-1] : null;
+      hr: (r.hr || []).flatMap(n => {
+        // Může přijít jako číslo, string nebo string s více čísly "1,3"
+        const str = String(n).replace(/[^\d,]/g, '');
+        return str.split(',').map(s => {
+          const num = parseInt(s.trim());
+          return (num >= 1 && num <= 9) ? hrLabels[num-1] : null;
+        });
       }).filter(Boolean)
     }));
 
@@ -1615,9 +1620,12 @@ Vrať POUZE JSON pole čísel bez markdown:
     // Převod čísel Info na názvy v kódu
     const infoLabels = ['Bezpečnější užívání','Bezpečný sex','Vitamíny/Dehydratace','Ochrana sluchu','Alko/Tono/CO info','Bezpečná přeprava','Další zdrav./soc.','Jiné'];
     const pass3 = pass3raw.map(r => ({
-      info: (r.info || []).map(n => {
-        const num = parseInt(n);
-        return (num >= 1 && num <= 8) ? infoLabels[num-1] : null;
+      info: (r.info || []).flatMap(n => {
+        const str = String(n).replace(/[^\d,]/g, '');
+        return str.split(',').map(s => {
+          const num = parseInt(s.trim());
+          return (num >= 1 && num <= 8) ? infoLabels[num-1] : null;
+        });
       }).filter(Boolean)
     }));
 

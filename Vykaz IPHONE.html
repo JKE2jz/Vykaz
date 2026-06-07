@@ -1538,30 +1538,25 @@ async function processScan() {
 
     // === PRŮCHOD 1: Pohlaví, typ kontaktu, OUT, PK ===
     btn.textContent = '⏳ Průchod 1/4 — základní údaje...';
-    const prompt1 = `Toto je papírový výkaz harm reduction. Soustřeď se POUZE na první 4 sloupce tabulky. Ignoruj vše ostatní včetně legendy dole.
+    const prompt1 = `Toto je papírový výkaz harm reduction. Soustřeď se POUZE na první 4 sloupce tabulky.
 
-SLOUPEC 1 - Č.Ř.: číslo řádku.
-OPAKOVANÝ KONTAKT - typ="Opakovaný" pokud platí JAKÁKOLIV z podmínek:
-- Vlevo před číslem řádku je symbol: + nebo × nebo x nebo křížek nebo tečka nebo jakýkoliv jiný symbol
-- Číslo řádku je zakroužkované nebo podtržené
-- Číslo řádku má před sebou nebo za sebou jakoukoliv značku
-Pokud je v sloupci M/Ž/ODM napsáno "ODM" → typ="Odmítnutý"
+OZNAČENÍ OPAKOVANÉHO KONTAKTU:
+V tomto výkazu jsou opakované kontakty označeny symbolem "+" který je napsán VLEVO OD TABULKY — tedy mimo tabulku, na levém okraji papíru, před číslem řádku.
+Například: symbol "+" nebo "×" nebo křížek nebo tečka nebo jakákoliv jiná značka vlevo od čísla řádku.
+Toto "+" NENÍ součástí tabulky a NENÍ to číslo v sloupci OUT!
+Pokud vidíš "+" vlevo od čísla řádku (mimo tabulku) → typ="Opakovaný"
+Pokud je číslo zakroužkované → typ="Opakovaný"
+Pokud sloupec M/Ž/ODM obsahuje "ODM" → typ="Odmítnutý"
 Jinak → typ="Klient"
 
-SLOUPEC 2 - M/Ž/ODM: 
-- M nebo m nebo velké M = "M" (muž)
-- Ž nebo ž nebo Z nebo z = "Ž" (žena)
-- Buď si JISTÝ před zápisem — pokud si nejsi jistý jestli je to M nebo Ž, podívej se znovu
+SLOUPEC 2 - M/Ž/ODM: M nebo m = "M" (muž), Ž nebo ž = "Ž" (žena)
 
-SLOUPEC 3 - OUT: číslo injekčních stříkaček. Prázdné nebo pomlčka = 0. NEPLÉST s HR sloupcem který je dále vpravo!
+SLOUPEC 3 - OUT: počet injekčních stříkaček. Tento sloupec je UVNITŘ tabulky, třetí zleva. Bývá téměř vždy prázdný. Prázdné = 0. Symbol "+" vlevo od tabulky NENÍ OUT!
 
-SLOUPEC 4 - PK: jakákoliv fajfka/v/u/✓/čárka = true. Prázdné = false.
-DŮLEŽITÉ: Opakovaný kontakt (typ="Opakovaný") NIKDY nemůže mít pk=true. Pokud je typ="Opakovaný", vždy nastav pk=false.
+SLOUPEC 4 - PK: fajfka/v/u/✓ = true. Prázdné = false. Opakovaný kontakt má vždy pk=false.
 
-Zpracuj každý řádek PRÁVĚ JEDNOU. Počet objektů = počet řádků tabulky.
-Vrať POUZE JSON pole bez markdown:
+Zpracuj každý řádek PRÁVĚ JEDNOU. Vrať POUZE JSON pole bez markdown:
 [{"pohlavi":"M","typ":"Klient","out":0,"pk":false}]`;
-
     const pass1 = await callAPI(prompt1);
 
     // === PRŮCHOD 2: HR materiál ===

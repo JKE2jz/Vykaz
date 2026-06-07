@@ -1551,7 +1551,7 @@ Jinak → typ="Klient"
 
 SLOUPEC 2 - M/Ž/ODM: M nebo m = "M" (muž), Ž nebo ž = "Ž" (žena)
 
-SLOUPEC 3 - OUT: počet injekčních stříkaček. Tento sloupec je UVNITŘ tabulky, třetí zleva. Bývá téměř vždy prázdný. Prázdné = 0. Symbol "+" vlevo od tabulky NENÍ OUT!
+SLOUPEC 3 - OUT: počet injekčních stříkaček. Tento sloupec je UVNITŘ tabulky, třetí zleva. Bývá téměř vždy prázdný nebo obsahuje malé číslo (0-50). Prázdné = 0. Symbol "+" vlevo od tabulky NENÍ OUT! Písmena jako M, Ž, v, u NEJSOU OUT! Pokud si nejsi jistý, napiš 0.
 
 SLOUPEC 4 - PK: fajfka/v/u/✓ = true. Prázdné = false. Opakovaný kontakt má vždy pk=false.
 
@@ -1667,6 +1667,7 @@ Vrať POUZE JSON pole bez markdown:
     scannedRecords = pass1.map((r, i) => ({
       ...r,
       pk: r.typ === 'Opakovaný' ? false : r.pk,
+      out: (Number.isInteger(r.out) && r.out >= 0 && r.out <= 200) ? r.out : 0,
       hr: (pass2[i] || {}).hr || [],
       info: (pass3[i] || {}).info || [],
       ...(pass4[i] || {}),

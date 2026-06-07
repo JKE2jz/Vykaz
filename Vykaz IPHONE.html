@@ -1564,31 +1564,62 @@ Vrať POUZE JSON pole bez markdown:
 
     // === PRŮCHOD 2: HR materiál ===
     btn.textContent = '⏳ Průchod 2/4 — HR materiál...';
-    const prompt2 = `Toto je papírový výkaz harm reduction. Soustřeď se POUZE na 5. sloupec zleva — sloupec HR (hned za sloupcem PK).
+    // === PRŮCHOD 2: HR - přečti čísla přesně jak jsou ===
+    btn.textContent = '⏳ Průchod 2/4 — čtení HR čísel...';
+    const prompt2 = `Toto je papírový výkaz harm reduction. Soustřeď se POUZE na 5. sloupec zleva — sloupec nadepsaný "HR" (je hned za sloupcem PK).
 
-Sloupec HR obsahuje čísla 1-9. Každé číslo znamená:
-1=Leták, 2=Kondomy, 3=Špunty, 4=Filtry, 5=Šňupátka/Kapsle, 6=Vitamíny/Voda, 7=Mat. k i.v. aplik., 8=Žvýkačky, 9=Jiný
+Tvůj úkol: Pro každý řádek tabulky přečti PŘESNĚ čísla která vidíš v HR sloupci. Nic nepřekládej, jen přepiš čísla jak jsou.
 
-Příklady: "1,3" → ["Leták","Špunty"], "6" → ["Vitamíny/Voda"], prázdné → []
-IGNORUJ všechny ostatní sloupce. IGNORUJ legendu dole.
-Vrať POUZE JSON pole bez markdown:
+Čísla mohou být oddělena čárkou, lomítkem nebo mezerou. Může být jedno číslo nebo více čísel.
+Pokud je buňka prázdná nebo prázdná šedá → napiš []
+Pokud vidíš např. "1,3" → napiš [1,3]
+Pokud vidíš "6" → napiš [6]
+Pokud vidíš "1/6" → napiš [1,6]
+
+IGNORUJ sloupec Info který je hned vpravo od HR — to je jiný sloupec!
+IGNORUJ legendu dole na stránce.
+Zpracuj každý řádek PRÁVĚ JEDNOU.
+Vrať POUZE JSON pole čísel bez markdown:
 [{"hr":[]}]`;
 
-    const pass2 = await callAPI(prompt2);
+    const pass2raw = await callAPI(prompt2);
 
-    // === PRŮCHOD 3: Info servis ===
-    btn.textContent = '⏳ Průchod 3/4 — Info servis...';
-    const prompt3 = `Toto je papírový výkaz harm reduction. Soustřeď se POUZE na 6. sloupec zleva — sloupec Info (hned za sloupcem HR).
+    // Převod čísel HR na názvy v kódu
+    const hrLabels = ['Leták','Kondomy','Špunty','Filtry','Šňupátka/Kapsle','Vitamíny/Voda','Mat. k i.v. aplik.','Žvýkačky','Jiný'];
+    const pass2 = pass2raw.map(r => ({
+      hr: (r.hr || []).map(n => {
+        const num = parseInt(n);
+        return (num >= 1 && num <= 9) ? hrLabels[num-1] : null;
+      }).filter(Boolean)
+    }));
 
-Sloupec Info obsahuje čísla 1-8. Každé číslo znamená:
-1=Bezpečnější užívání, 2=Bezpečný sex, 3=Vitamíny/Dehydratace, 4=Ochrana sluchu, 5=Alko/Tono/CO info, 6=Bezpečná přeprava, 7=Další zdrav./soc., 8=Jiné
+    // === PRŮCHOD 3: Info - přečti čísla přesně jak jsou ===
+    btn.textContent = '⏳ Průchod 3/4 — čtení Info čísel...';
+    const prompt3 = `Toto je papírový výkaz harm reduction. Soustřeď se POUZE na 6. sloupec zleva — sloupec nadepsaný "Info" (je hned za sloupcem HR).
 
-Příklady: "8" → ["Jiné"], "1,8" → ["Bezpečnější užívání","Jiné"], prázdné → []
-IGNORUJ všechny ostatní sloupce včetně HR. IGNORUJ legendu dole.
-Vrať POUZE JSON pole bez markdown:
+Tvůj úkol: Pro každý řádek tabulky přečti PŘESNĚ čísla která vidíš v Info sloupci. Nic nepřekládej, jen přepiš čísla jak jsou.
+
+Čísla mohou být oddělena čárkou, lomítkem nebo mezerou. Může být jedno číslo nebo více čísel.
+Pokud je buňka prázdná nebo prázdná šedá → napiš []
+Pokud vidíš např. "1,8" → napiš [1,8]
+Pokud vidíš "8" → napiš [8]
+
+IGNORUJ sloupec HR který je hned vlevo od Info — to je jiný sloupec!
+IGNORUJ legendu dole na stránce.
+Zpracuj každý řádek PRÁVĚ JEDNOU.
+Vrať POUZE JSON pole čísel bez markdown:
 [{"info":[]}]`;
 
-    const pass3 = await callAPI(prompt3);
+    const pass3raw = await callAPI(prompt3);
+
+    // Převod čísel Info na názvy v kódu
+    const infoLabels = ['Bezpečnější užívání','Bezpečný sex','Vitamíny/Dehydratace','Ochrana sluchu','Alko/Tono/CO info','Bezpečná přeprava','Další zdrav./soc.','Jiné'];
+    const pass3 = pass3raw.map(r => ({
+      info: (r.info || []).map(n => {
+        const num = parseInt(n);
+        return (num >= 1 && num <= 8) ? infoLabels[num-1] : null;
+      }).filter(Boolean)
+    }));
 
     // === PRŮCHOD 4: Fajfky + drogy ===
     btn.textContent = '⏳ Průchod 4/4 — fajfky a drogy...';

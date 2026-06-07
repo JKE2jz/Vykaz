@@ -1540,17 +1540,23 @@ async function processScan() {
     const prompt1 = `Toto je papírový výkaz harm reduction. Soustřeď se POUZE na první 4 sloupce tabulky. Ignoruj vše ostatní včetně legendy dole.
 
 SLOUPEC 1 - Č.Ř.: číslo řádku.
-DŮLEŽITÉ pro typ kontaktu:
-- Pokud je PŘED číslem řádku symbol "+" (vlevo od čísla v prvním sloupci) → typ="Opakovaný"
-- Pokud je číslo řádku zakroužkované → typ="Opakovaný"
-- Pokud je v sloupci 2 napsáno "ODM" → typ="Odmítnutý"
-- Ve všech ostatních případech → typ="Klient"
+OPAKOVANÝ KONTAKT - typ="Opakovaný" pokud platí JAKÁKOLIV z podmínek:
+- Vlevo před číslem řádku je symbol: + nebo × nebo x nebo křížek nebo tečka nebo jakýkoliv jiný symbol
+- Číslo řádku je zakroužkované nebo podtržené
+- Číslo řádku má před sebou nebo za sebou jakoukoliv značku
+Pokud je v sloupci M/Ž/ODM napsáno "ODM" → typ="Odmítnutý"
+Jinak → typ="Klient"
 
-SLOUPEC 2 - M/Ž/ODM: M nebo m → "M", Ž nebo ž → "Ž"
-SLOUPEC 3 - OUT: číslo injekčních stříkaček. Prázdné = 0. NEPLÉST s HR sloupcem!
-SLOUPEC 4 - PK: fajfka/v/u/✓ = true. Prázdné = false.
+SLOUPEC 2 - M/Ž/ODM: 
+- M nebo m nebo velké M = "M" (muž)
+- Ž nebo ž nebo Z nebo z = "Ž" (žena)
+- Buď si JISTÝ před zápisem — pokud si nejsi jistý jestli je to M nebo Ž, podívej se znovu
 
-Zpracuj každý řádek PRÁVĚ JEDNOU.
+SLOUPEC 3 - OUT: číslo injekčních stříkaček. Prázdné nebo pomlčka = 0. NEPLÉST s HR sloupcem který je dále vpravo!
+
+SLOUPEC 4 - PK: jakákoliv fajfka/v/u/✓/čárka = true. Prázdné = false.
+
+Zpracuj každý řádek PRÁVĚ JEDNOU. Počet objektů = počet řádků tabulky.
 Vrať POUZE JSON pole bez markdown:
 [{"pohlavi":"M","typ":"Klient","out":0,"pk":false}]`;
 
@@ -1597,7 +1603,24 @@ SLOUPEC 12 - Předávkování: fajfka=true, prázdné=false
 SLOUPEC 13 - Řešení akut. intox.: fajfka=true, prázdné=false
 SLOUPEC 14 - Zdrav. ošetření: fajfka=true, prázdné=false
 SLOUPEC 15 - Kontakt. práce: fajfka=true, prázdné=false (předposlední sloupec)
-SLOUPEC 16 - Primární drogy: ALK/Alko=Alkohol, TAB=Tabák, THC=THC, MDMA/EXT=Extáze, KOK=Kokain, MEF=Mefedron/Katinony, SPE=Speed, LSD=LSD, PER/PERV=Pervitin, POP=Poppers, HER=Heroin, KRA=Kratom, KET=Ketamin, LEK=Léky na předpis
+SLOUPEC 16 - Primární drogy: text nebo zkratky oddělené čárkou nebo mezerou.
+Převeď KAŽDOU zkratku zvlášť:
+ALK nebo Alko nebo Alkohol = Alkohol
+TAB nebo Tabak nebo Tabák = Tabák
+THC = THC
+MDMA nebo EXT nebo Extáze = Extáze
+KOK nebo Kok = Kokain
+MEF nebo Kat = Mefedron/Katinony
+SPE nebo Speed = Speed
+LSD = LSD
+LYS nebo Lyso = Lysohlávky
+PER nebo PERV nebo Perv = Pervitin
+POP = Poppers
+HER = Heroin
+KRA nebo Krat = Kratom
+KET = Ketamin
+LEK = Léky na předpis
+Pokud jsou v buňce DVOJE nebo VÍCE zkratek (oddělené čárkou, mezerou nebo lomítkem), zahrň VŠECHNY.
 
 IGNORUJ sloupce 1-6. IGNORUJ legendu dole.
 Vrať POUZE JSON pole bez markdown:

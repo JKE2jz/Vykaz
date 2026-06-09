@@ -1,0 +1,1736 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Výkaz na akci</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0f0f13;
+    --surface: #1a1a22;
+    --surface2: #22222e;
+    --border: #2e2e3e;
+    --accent: #e8ff47;
+    --accent2: #47b4ff;
+    --accent3: #ff6b6b;
+    --text: #f0f0f5;
+    --text2: #9090a8;
+    --radius: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* ===== SCREENS ===== */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ===== START SCREEN ===== */
+  #screen-start {
+    align-items: center;
+    justify-content: center;
+    padding: 20px 20px 60px;
+  }
+  .start-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 480px;
+  }
+  .logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .start-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 32px;
+    line-height: 1.2;
+  }
+  .start-title span { color: var(--accent); }
+
+  .form-group { margin-bottom: 16px; }
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text2);
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  input[type="text"], input[type="date"], textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, textarea:focus { border-color: var(--accent); }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 24px 0;
+  }
+
+  .saved-actions { margin-top: 16px; }
+  .saved-action-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .saved-action-item:hover { border-color: var(--accent2); }
+  .saved-action-name { font-weight: 500; }
+  .saved-action-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .saved-action-del {
+    background: none;
+    border: none;
+    color: var(--accent3);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  .saved-action-del:hover { background: rgba(255,107,107,0.15); }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 11px 20px;
+    transition: all 0.15s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #0f0f13;
+    width: 100%;
+    justify-content: center;
+    font-size: 15px;
+    padding: 13px 20px;
+  }
+  .btn-primary:hover { background: #d4eb30; }
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--accent2); color: var(--accent2); }
+  .btn-danger {
+    background: rgba(255,107,107,0.15);
+    color: var(--accent3);
+    border: 1px solid rgba(255,107,107,0.3);
+  }
+  .btn-danger:hover { background: rgba(255,107,107,0.25); }
+  .btn-accent2 {
+    background: var(--accent2);
+    color: #0f0f13;
+  }
+  .btn-accent2:hover { background: #2fa3f0; }
+
+  /* ===== MAIN APP ===== */
+  #screen-app { flex-direction: column; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 52px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    flex-shrink: 0;
+  }
+  .topbar-name {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .topbar-date { font-size: 12px; color: var(--text2); }
+  .topbar-count {
+    margin-left: auto;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: var(--text2);
+  }
+  .topbar-count span { color: var(--accent); font-weight: 700; }
+
+  /* ===== TABS ===== */
+  .tabs {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    gap: 4px;
+  }
+  .tab {
+    padding: 12px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ===== FORM TAB ===== */
+  .tab-content { display: none; flex: 1; overflow-y: auto; }
+  .tab-content.active { display: block; }
+
+  .form-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 24px 20px 40px;
+  }
+
+  .form-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .form-section-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  /* Radio / toggle */
+  .radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .radio-option { display: none; }
+  .radio-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .radio-option:checked + .radio-label {
+    background: rgba(232,255,71,0.08);
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    outline: 3px solid transparent;
+    box-shadow: 0 0 0 2px var(--accent), 2px 2px 0 2px var(--accent), -2px -2px 0 2px var(--accent), 2px -2px 0 2px var(--accent), -2px 2px 0 2px var(--accent);
+    background-image: repeating-linear-gradient(45deg, rgba(232,255,71,0.12) 0px, rgba(232,255,71,0.12) 2px, transparent 2px, transparent 8px);
+  }
+
+  /* Checkboxes */
+  .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+  .check-option { display: none; }
+  .check-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .check-label::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    background: var(--bg);
+    transition: all 0.15s;
+  }
+  .check-option:checked + .check-label {
+    background-image: repeating-linear-gradient(45deg, rgba(232,255,71,0.12) 0px, rgba(232,255,71,0.12) 2px, transparent 2px, transparent 8px);
+    border: 2px solid var(--accent);
+    color: var(--accent);
+  }
+  .check-option:checked + .check-label::before {
+    background: var(--accent);
+    border-color: var(--accent);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8l4 4 6-6' stroke='%230f0f13' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+
+  /* Toggle row */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-label-text { font-size: 13px; }
+  .toggle-btns { display: flex; gap: 6px; }
+  .toggle-btn {
+    padding: 5px 14px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text2);
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .toggle-btn.yes.active { background-image: repeating-linear-gradient(45deg, rgba(232,255,71,0.12) 0px, rgba(232,255,71,0.12) 2px, transparent 2px, transparent 8px); border: 2px solid var(--accent); color: var(--accent); }
+  .toggle-btn.no.active { background: rgba(144,144,168,0.1); border-color: var(--text2); color: var(--text2); }
+
+  .conditional-field {
+    margin-top: 10px;
+    display: none;
+  }
+  .conditional-field.visible { display: block; }
+  .conditional-field textarea {
+    height: 70px;
+    resize: vertical;
+  }
+
+  .number-input-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .number-input-row input[type="number"] {
+    width: 120px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .number-input-row input[type="number"]:focus { border-color: var(--accent); }
+
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+  }
+  .form-actions .btn { flex: 1; justify-content: center; }
+
+  /* ===== TABLE TAB ===== */
+  .table-container {
+    padding: 16px 20px;
+    overflow-x: auto;
+  }
+  .table-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 12px;
+    min-width: 1200px;
+  }
+  th {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 8px 10px;
+    text-align: left;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text2);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+  }
+  td {
+    border: 1px solid var(--border);
+    padding: 6px 10px;
+    vertical-align: middle;
+    max-width: 200px;
+  }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .td-actions { white-space: nowrap; }
+  .td-chip {
+    display: inline-block;
+    background: rgba(71,180,255,0.15);
+    color: var(--accent2);
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-size: 10px;
+    margin: 1px;
+  }
+  .td-chip.green { background: rgba(71,255,120,0.12); color: #47ff78; }
+  .td-chip.yellow { background: rgba(232,255,71,0.12); color: var(--accent); }
+  .td-chip.red { background: rgba(255,107,107,0.12); color: var(--accent3); }
+  .td-type-klient { color: var(--accent); font-weight: 600; }
+  .td-type-kontakt { color: var(--accent2); }
+  .td-type-odm { color: var(--accent3); }
+
+  .row-edit-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    border-radius: 4px;
+    padding: 3px 8px;
+    cursor: pointer;
+    font-size: 11px;
+    margin-right: 4px;
+    transition: all 0.15s;
+  }
+  .row-edit-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+  .row-del-btn {
+    background: none;
+    border: 1px solid rgba(255,107,107,0.3);
+    color: var(--accent3);
+    border-radius: 4px;
+    padding: 3px 8px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.15s;
+  }
+  .row-del-btn:hover { background: rgba(255,107,107,0.15); }
+
+  /* ===== REPORT TAB ===== */
+  .report-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 20px 40px;
+  }
+  .report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .report-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .report-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .report-card-label {
+    font-size: 11px;
+    color: var(--text2);
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+  .report-card-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .report-card-value.blue { color: var(--accent2); }
+  .report-card-value.red { color: var(--accent3); }
+  .report-section-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text2);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 24px 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .drugs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px;
+  }
+  .drug-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .drug-name { font-size: 12px; }
+  .drug-count {
+    font-family: 'Space Mono', monospace;
+    font-size: 18px;
+    color: var(--accent2);
+    font-weight: 700;
+  }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 28px;
+  }
+  .modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+  .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+  .modal-actions .btn { flex: 1; justify-content: center; }
+
+  /* ===== EMPTY STATE ===== */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text2);
+  }
+  .empty-state-icon { font-size: 48px; margin-bottom: 16px; }
+  .empty-state-text { font-size: 16px; }
+
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface);
+    border: 1px solid var(--accent3);
+    color: var(--accent3);
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 9999;
+    white-space: nowrap;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+  .toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+</style>
+</head>
+<body>
+
+<!-- ===== START SCREEN ===== -->
+<div id="screen-start" class="screen active">
+  <div class="start-box">
+    <div class="logo" style="font-size:14px;">Hard&amp;Smart</div>
+    <h1 class="start-title">Výkaz<br><span>na akci</span></h1>
+
+    <div class="form-group">
+      <label>Název akce / párty</label>
+      <input type="text" id="start-name" placeholder="např. Technoparty XYZ">
+    </div>
+    <div class="form-group">
+      <label>Datum</label>
+      <input type="date" id="start-date">
+    </div>
+    <div class="form-group">
+      <label>Místo</label>
+      <input type="text" id="start-place" placeholder="např. ArtBar, Brno">
+    </div>
+    <div class="form-group">
+      <label>Pracovníci (celé jméno na řádek)</label>
+      <textarea id="start-workers" rows="3" placeholder="např. Dan Mejdan&#10;..."></textarea>
+    </div>
+    <div class="form-group" style="display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;">
+      <input type="checkbox" id="awareness" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;">
+      <label for="awareness" style="cursor:pointer;font-size:14px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin:0;">AWARENESS</label>
+    </div>
+    <button class="btn btn-primary" onclick="startNewAction()">✦ Spustit novou akci</button>
+
+    <hr class="divider">
+
+    <div style="font-size:12px;color:var(--accent);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px;font-weight:500;">Uložené akce:</div>
+    <div id="saved-actions-list" class="saved-actions"></div>
+  </div>
+</div>
+
+<!-- ===== APP SCREEN ===== -->
+<div id="screen-app" class="screen">
+  <div class="topbar">
+    <div>
+      <div class="topbar-name" id="topbar-name">—</div>
+      <div class="topbar-date" id="topbar-date">—</div>
+    </div>
+    <div class="topbar-count">Záznamy: <span id="topbar-count">0</span></div>
+    <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px;" onclick="goHome()">← Domů</button>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('form')">✦ Zadání</div>
+    <div class="tab" onclick="switchTab('table')">▤ Tabulka</div>
+    <div class="tab" onclick="switchTab('report')">◈ Report</div>
+  </div>
+
+  <!-- FORM TAB -->
+  <div id="tab-form" class="tab-content active">
+    <div class="form-container">
+
+      <!-- RYCHLÉ ZKRATKY -->
+      <div style="display:flex;gap:10px;margin-bottom:16px;">
+        <button class="btn" onclick="quickSave('M')" id="quick-m" style="flex:1;justify-content:center;background:rgba(71,180,255,0.12);border:1px solid rgba(71,180,255,0.4);color:var(--accent2);font-size:10px;font-weight:700;padding:17px 6px;gap:8px;line-height:1.3;white-space:nowrap;">
+          <span>Muž — opak. kontakt · Ovoce/Voda</span>
+        </button>
+        <button class="btn" onclick="quickSave('Ž')" id="quick-z" style="flex:1;justify-content:center;background:rgba(200,80,255,0.12);border:1px solid rgba(200,80,255,0.4);color:#c850ff;font-size:10px;font-weight:700;padding:17px 6px;gap:8px;line-height:1.3;white-space:nowrap;">
+          <span>Žena — opak. kontakt · Ovoce/Voda</span>
+        </button>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">01 — Pohlaví &amp; Typ kontaktu <span style="color:var(--accent3)">*</span></div>
+        <div style="margin-bottom:14px;">
+          <label style="font-weight:700;font-size:14px;color:var(--text);">Pohlaví</label>
+          <div class="radio-group">
+            <input type="radio" name="pohlavi" id="p-muz" value="M" class="radio-option">
+            <label for="p-muz" class="radio-label">♂ Muž</label>
+            <input type="radio" name="pohlavi" id="p-zena" value="Ž" class="radio-option">
+            <label for="p-zena" class="radio-label">♀ Žena</label>
+          </div>
+        </div>
+        <div>
+          <label style="font-weight:700;font-size:14px;color:var(--text);">Typ kontaktu</label>
+          <div class="radio-group">
+            <input type="radio" name="typ" id="t-klient" value="Klient" class="radio-option" onchange="handleTypChange()">
+            <label for="t-klient" class="radio-label">◉ Klient</label>
+            <input type="radio" name="typ" id="t-opak" value="Opakovaný" class="radio-option" onchange="handleTypChange()">
+            <label for="t-opak" class="radio-label">↩ Opakovaný kontakt</label>
+            <input type="radio" name="typ" id="t-odm" value="Odmítnutý" class="radio-option" onchange="handleTypChange()">
+            <label for="t-odm" class="radio-label">✕ Odmítnutý kontakt</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEKCE 2: Stříkačky -->
+      <div class="form-section">
+        <div class="form-section-title">02 — Vydané injekční stříkačky (OUT)</div>
+        <div class="number-input-row">
+          <input type="number" id="out" oninput="checkOutOdm(this)" min="0" value="" placeholder="0">
+          <span style="color:var(--text2);font-size:13px;">ks</span>
+        </div>
+      </div>
+
+      <!-- SEKCE 3: Prvokontakt -->
+      <div class="form-section">
+        <div class="form-section-title">03 — Prvokontakt</div>
+        <div class="toggle-row" style="border:none;padding:0;">
+          <span class="toggle-label-text">Poprvé v životě v kontaktu se službou?</span>
+          <div class="toggle-btns">
+            <button class="toggle-btn yes" id="pk-yes" onclick="toggleField('pk','yes')">Ano</button>
+            <button class="toggle-btn no active" id="pk-no" onclick="toggleField('pk','no')">Ne</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEKCE 4: HR Materiál -->
+      <div class="form-section">
+        <div class="form-section-title">04 — Harm Reduction materiál</div>
+        <div class="checkbox-grid">
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="hr1" class="check-option"><label for="hr1" class="check-label">1. Leták</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="hr2" class="check-option"><label for="hr2" class="check-label">2. Kondomy</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="hr3" class="check-option"><label for="hr3" class="check-label">3. Špunty</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="hr4" class="check-option"><label for="hr4" class="check-label">4. Filtry</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="hr5" class="check-option"><label for="hr5" class="check-label">5. Šňupátka / Kapsle</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="hr6" class="check-option"><label for="hr6" class="check-label">6. Vitamíny / Voda</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="hr7" class="check-option"><label for="hr7" class="check-label">7. Mat. k i.v. aplikaci</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="hr8" class="check-option"><label for="hr8" class="check-label">8. Žvýkačky</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="hr9" class="check-option"><label for="hr9" class="check-label">9. Jiný</label></div>
+        </div>
+      </div>
+
+      <!-- SEKCE 5: Info -->
+      <div class="form-section">
+        <div class="form-section-title">05 — Informační servis</div>
+        <div class="checkbox-grid">
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="info1" class="check-option"><label for="info1" class="check-label">1. Bezpečnější užívání</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="info2" class="check-option"><label for="info2" class="check-label">2. Bezpečný sex</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="info3" class="check-option"><label for="info3" class="check-label">3. Vitamíny / Dehydratace</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="info4" class="check-option"><label for="info4" class="check-label">4. Ochrana sluchu</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="info5" class="check-option"><label for="info5" class="check-label">5. Alko/Tono/CO test info</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="info6" class="check-option"><label for="info6" class="check-label">6. Bezpečná přeprava</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="info7" class="check-option"><label for="info7" class="check-label">7. Další zdrav. a soc. oblast</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="info8" class="check-option"><label for="info8" class="check-label">8. Jiné (web, literatura…)</label></div>
+        </div>
+      </div>
+
+      <!-- SEKCE 6: Odkaz do služby -->
+      <div class="form-section">
+        <div class="form-section-title">06 — Odkaz do služby</div>
+        <div class="toggle-row" style="border:none;padding:0 0 10px 0;">
+          <span class="toggle-label-text">Proběhl odkaz do služby?</span>
+          <div class="toggle-btns">
+            <button class="toggle-btn yes" id="odkaz-yes" onclick="toggleField('odkaz','yes')">Ano</button>
+            <button class="toggle-btn no active" id="odkaz-no" onclick="toggleField('odkaz','no')">Ne</button>
+          </div>
+        </div>
+        <div class="conditional-field" id="odkaz-detail">
+          <label>Kam byl klient odkázán?</label>
+          <div style="position:relative;">
+            <textarea id="odkaz-text" placeholder="Popis odkazu..." style="padding-right:44px;"></textarea>
+            <button type="button" onclick="startVoice('odkaz-text')" id="mic-odkaz" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--text2);font-size:32px;">🎤</button>
+          </div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px;">Na iPhone použij 🎤 na klávesnici</div>
+        </div>
+      </div>
+
+      <!-- SEKCE 7: Individuální poradenství -->
+      <div class="form-section">
+        <div class="form-section-title">07 — Individuální poradenství</div>
+        <div class="toggle-row" style="border:none;padding:0 0 10px 0;">
+          <span class="toggle-label-text">Proběhlo individuální poradenství?</span>
+          <div class="toggle-btns">
+            <button class="toggle-btn yes" id="individ-yes" onclick="toggleField('individ','yes')">Ano</button>
+            <button class="toggle-btn no active" id="individ-no" onclick="toggleField('individ','no')">Ne</button>
+          </div>
+        </div>
+        <div class="conditional-field" id="individ-detail">
+          <label>Popis poradenství</label>
+          <div style="position:relative;">
+            <textarea id="individ-text" placeholder="Popis poradenství..." style="padding-right:44px;"></textarea>
+            <button type="button" onclick="startVoice('individ-text')" id="mic-individ" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--text2);font-size:32px;">🎤</button>
+          </div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px;">Na iPhone použij 🎤 na klávesnici</div>
+        </div>
+      </div>
+
+      <!-- SEKCE 8-11: Testy -->
+      <div class="form-section">
+        <div class="form-section-title">08–11 — Testy &amp; měření</div>
+        <div class="toggle-row">
+          <span class="toggle-label-text">Alkotest</span>
+          <div class="toggle-btns">
+            <button class="toggle-btn yes" id="alkotest-yes" onclick="toggleField('alkotest','yes')">Ano</button>
+            <button class="toggle-btn no active" id="alkotest-no" onclick="toggleField('alkotest','no')">Ne</button>
+          </div>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label-text">Tonometr</span>
+          <div class="toggle-btns">
+            <button class="toggle-btn yes" id="tonometr-yes" onclick="toggleField('tonometr','yes')">Ano</button>
+            <button class="toggle-btn no active" id="tonometr-no" onclick="toggleField('tonometr','no')">Ne</button>
+          </div>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label-text">Výdej testovacího kitu</span>
+          <div class="toggle-btns">
+            <button class="toggle-btn yes" id="testy-yes" onclick="toggleField('testy','yes')">Ano</button>
+            <button class="toggle-btn no active" id="testy-no" onclick="toggleField('testy','no')">Ne</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEKCE 12: Předávkování -->
+      <div class="form-section">
+        <div class="form-section-title">12 — Předávkování</div>
+        <div class="toggle-row" style="border:none;padding:0 0 10px 0;">
+          <span class="toggle-label-text">Došlo k předávkování?</span>
+          <div class="toggle-btns">
+            <button class="toggle-btn yes" id="predavk-yes" onclick="toggleField('predavk','yes')">Ano</button>
+            <button class="toggle-btn no active" id="predavk-no" onclick="toggleField('predavk','no')">Ne</button>
+          </div>
+        </div>
+        <div class="conditional-field" id="predavk-detail">
+          <label>Detaily předávkování</label>
+          <div style="position:relative;">
+            <textarea id="predavk-text" placeholder="Popis situace..." style="padding-right:44px;"></textarea>
+            <button type="button" onclick="startVoice('predavk-text')" id="mic-predavk" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--text2);font-size:32px;">🎤</button>
+          </div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px;">Na iPhone použij 🎤 na klávesnici</div>
+        </div>
+      </div>
+
+      <!-- SEKCE 13-14 -->
+      <div class="form-section">
+        <div class="form-section-title">13–14 — Intervence</div>
+        <div class="toggle-row">
+          <span class="toggle-label-text">Řešení akutní intoxikace</span>
+          <div class="toggle-btns">
+            <button class="toggle-btn yes" id="intox-yes" onclick="toggleField('intox','yes')">Ano</button>
+            <button class="toggle-btn no active" id="intox-no" onclick="toggleField('intox','no')">Ne</button>
+          </div>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label-text">Zdravotní ošetření</span>
+          <div class="toggle-btns">
+            <button class="toggle-btn yes" id="zdrav-yes" onclick="toggleField('zdrav','yes')">Ano</button>
+            <button class="toggle-btn no active" id="zdrav-no" onclick="toggleField('zdrav','no')">Ne</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEKCE 15: Kontaktní práce -->
+      <div class="form-section">
+        <div class="form-section-title">15 — Kontaktní práce</div>
+        <div class="toggle-row" style="border:none;padding:0;">
+          <span class="toggle-label-text">Kontaktní práce</span>
+          <div class="toggle-btns">
+            <button class="toggle-btn yes" id="kontprace-yes" onclick="toggleField('kontprace','yes')">Ano</button>
+            <button class="toggle-btn no active" id="kontprace-no" onclick="toggleField('kontprace','no')">Ne</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEKCE 16: Drogy -->
+      <div class="form-section">
+        <div class="form-section-title">16 — Primární drogy / Kombinace</div>
+        <div class="checkbox-grid" style="margin-bottom:12px;">
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-alkohol" class="check-option"><label for="d-alkohol" class="check-label">Alkohol</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-tabak" class="check-option"><label for="d-tabak" class="check-label">Tabák</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-thc" class="check-option"><label for="d-thc" class="check-label">THC</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-extaze" class="check-option"><label for="d-extaze" class="check-label">Extáze</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-kokain" class="check-option"><label for="d-kokain" class="check-label">Kokain</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-mefedron" class="check-option"><label for="d-mefedron" class="check-label">Mefedron / Katinony</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-speed" class="check-option"><label for="d-speed" class="check-label">Speed</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-lsd" class="check-option"><label for="d-lsd" class="check-label">LSD</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-lysohlavky" class="check-option"><label for="d-lysohlavky" class="check-label">Lysohlávky</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-pervitin" class="check-option"><label for="d-pervitin" class="check-label">Pervitin</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-poppers" class="check-option"><label for="d-poppers" class="check-label">Poppers</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-heroin" class="check-option"><label for="d-heroin" class="check-label">Heroin</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-kratom" class="check-option"><label for="d-kratom" class="check-label">Kratom</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-ketamin" class="check-option"><label for="d-ketamin" class="check-label">Ketamin</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-leky" class="check-option"><label for="d-leky" class="check-label">Léky na předpis</label></div>
+          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-kanabinoidy" class="check-option"><label for="d-kanabinoidy" class="check-label">Další kanabinoidy</label></div>
+          <div><input type="checkbox" id="d-jine" class="check-option" onchange="document.getElementById('drogy-jine-wrap').classList.toggle('visible', this.checked); if(!this.checked) document.getElementById('d-jine-text').value='';"><label for="d-jine" class="check-label">Jiné</label></div>
+        </div>
+        <div class="conditional-field" id="drogy-jine-wrap">
+          <label>Jiné — upřesnění</label>
+          <input type="text" id="d-jine-text" placeholder="Upřesněte...">
+        </div>
+      </div>
+
+      <div class="form-section" style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+        <div>
+          <div class="form-section-title" style="margin-bottom:4px;font-size:13px;">Násobit dotazník</div>
+          <div style="font-size:12px;color:var(--text2);">Počet stejných záznamů k uložení</div>
+        </div>
+        <input type="number" id="multiply" min="1" value="1" style="width:80px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:'DM Sans',sans-serif;font-size:20px;font-weight:600;padding:10px 14px;outline:none;text-align:center;">
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="resetForm()">↺ Vymazat</button>
+        <button class="btn btn-primary" onclick="saveRecord()">✦ Další klient</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLE TAB -->
+  <div id="tab-table" class="tab-content">
+    <div class="table-container">
+      <div class="table-actions">
+        <button class="btn btn-secondary" onclick="exportTableExcel()">↓ Export tabulky (Excel)</button>
+      </div>
+      <div id="table-wrapper">
+        <div class="empty-state">
+          <div class="empty-state-icon">◎</div>
+          <div class="empty-state-text">Zatím žádné záznamy</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPORT TAB -->
+  <div id="tab-report" class="tab-content">
+    <div class="report-container">
+      <div class="report-header">
+        <div>
+          <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--text2);margin-bottom:4px;">SOUČTOVÝ REPORT</div>
+          <div id="report-title" style="font-size:22px;font-weight:600;"></div>
+        </div>
+        <button class="btn btn-secondary" onclick="exportReportExcel()">↓ Export reportu (Excel)</button>
+      </div>
+      <div id="report-content"></div>
+    </div>
+  </div>
+</div>
+
+  <!-- SCAN TAB -->
+  <div id="tab-scan" class="tab-content">
+    <div class="form-container">
+
+      <div class="form-section">
+        <div class="form-section-title">API Klíč</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:10px;">Klíč se uloží lokálně v prohlížeči. Získáš ho na console.anthropic.com</div>
+        <div style="display:flex;gap:8px;">
+          <input type="password" id="api-key-input" placeholder="sk-ant-..." style="flex:1;">
+          <button class="btn btn-secondary" onclick="saveApiKey()" style="white-space:nowrap;">Uložit</button>
+        </div>
+        <div id="api-key-status" style="font-size:12px;margin-top:8px;color:var(--text2);"></div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Nahrát scan výkazu</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px;">Nahraj fotografii nebo scan papírového výkazu. Claude rozpozná záznamy a přidá je do tabulky.</div>
+        <div id="scan-drop-zone" style="border:2px dashed var(--border);border-radius:10px;padding:32px;text-align:center;cursor:pointer;transition:border-color 0.2s;" onclick="document.getElementById('scan-file-input').click()" ondragover="event.preventDefault();this.style.borderColor='var(--accent)'" ondragleave="this.style.borderColor=''" ondrop="handleScanDrop(event)">
+          <div style="font-size:32px;margin-bottom:8px;">📄</div>
+          <div style="color:var(--text2);font-size:13px;">Klikni nebo přetáhni soubor sem</div>
+          <div style="color:var(--text2);font-size:11px;margin-top:4px;">JPG, PNG, PDF</div>
+        </div>
+        <input type="file" id="scan-file-input" accept="image/*,application/pdf" style="display:none;" onchange="handleScanFile(this.files[0])">
+      </div>
+
+      <div id="scan-preview-section" style="display:none;">
+        <div class="form-section">
+          <div class="form-section-title">Náhled</div>
+          <img id="scan-preview-img" style="max-width:100%;border-radius:8px;margin-bottom:12px;">
+          <button class="btn btn-primary" onclick="processScan()" id="scan-btn">⊕ Zpracovat scan</button>
+          <button class="btn btn-danger" onclick="cancelScan()" id="scan-cancel-btn" style="display:none;margin-top:8px;width:100%;justify-content:center;">✕ Zrušit zpracování</button>
+        </div>
+      </div>
+
+      <div id="scan-result-section" style="display:none;">
+        <div class="form-section">
+          <div class="form-section-title">Rozpoznané záznamy</div>
+          <div id="scan-result-content"></div>
+          <div style="display:flex;gap:10px;margin-top:16px;">
+            <button class="btn btn-secondary" onclick="document.getElementById('scan-result-section').style.display='none'">Zrušit</button>
+            <button class="btn btn-primary" onclick="importScanRecords()">✦ Importovat do tabulky</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+<!-- CONFIRM MODAL -->
+<div id="confirm-modal" class="modal-overlay">
+  <div class="modal" style="max-width:320px;text-align:center;">
+    <div id="confirm-msg" style="font-size:16px;font-weight:600;margin-bottom:24px;"></div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-secondary" id="confirm-no" style="flex:1;justify-content:center;">Zrušit</button>
+      <button class="btn btn-danger" id="confirm-yes" style="flex:1;justify-content:center;">Smazat</button>
+    </div>
+  </div>
+</div>
+
+<div id="edit-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">✎ Upravit záznam</div>
+    <div id="modal-form-content"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Zrušit</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Uložit změny</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+function startVoice(fieldId) {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    showToast('Na iPhone použij 🎤 na klávesnici pro hlasový vstup.');
+    return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SR();
+  recognition.lang = 'cs-CZ';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  const micId = 'mic-' + fieldId.replace('-text', '');
+  const btn = document.getElementById(micId);
+  if (btn) { btn.textContent = '⏹'; btn.style.color = 'var(--accent3)'; btn.style.borderColor = 'var(--accent3)'; }
+
+  recognition.onresult = (e) => {
+    const transcript = e.results[0][0].transcript;
+    const field = document.getElementById(fieldId);
+    field.value = (field.value ? field.value + ' ' : '') + transcript;
+  };
+  recognition.onerror = (e) => { 
+    if (e.error === 'not-allowed') showToast('Povol přístup k mikrofonu v nastavení prohlížeče.');
+    else if (e.error === 'network') showToast('Hlasový vstup vyžaduje připojení k internetu.');
+    else showToast('Hlasový vstup se nezdařil: ' + e.error); 
+  };
+  recognition.onend = () => {
+    if (btn) { btn.textContent = '🎤'; btn.style.color = ''; btn.style.borderColor = ''; }
+  };
+  recognition.start();
+}
+
+function showConfirm(msg, onYes) {
+  document.getElementById('confirm-msg').textContent = msg;
+  document.getElementById('confirm-modal').classList.add('active');
+  document.getElementById('confirm-yes').onclick = () => {
+    document.getElementById('confirm-modal').classList.remove('active');
+    onYes();
+  };
+  document.getElementById('confirm-no').onclick = () => {
+    document.getElementById('confirm-modal').classList.remove('active');
+  };
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('visible');
+  setTimeout(() => t.classList.remove('visible'), 2500);
+}
+// ===== STATE =====
+let currentAction = null;
+let records = [];
+let editingIdx = null;
+let toggleStates = {};
+
+const DRUGS = ['alkohol','tabak','thc','extaze','kokain','mefedron','speed','lsd','lysohlavky','pervitin','poppers','heroin','kratom','ketamin','leky','kanabinoidy','jine'];
+const DRUG_LABELS = ['Alkohol','Tabák','THC','Extáze','Kokain','Mefedron/Katinony','Speed','LSD','Lysohlávky','Pervitin','Poppers','Heroin','Kratom','Ketamin','Léky na předpis','Další kanabinoidy','Jiné'];
+const HR_LABELS = ['Leták','Kondomy','Špunty','Filtry','Šňupátka/Kapsle','Vitamíny/Voda','Mat. k i.v. aplik.','Žvýkačky','Jiný'];
+const INFO_LABELS = ['Bezpečnější užívání','Bezpečný sex','Vitamíny/Dehydratace','Ochrana sluchu','Alko/Tono/CO info','Bezpečná přeprava','Další zdrav./soc.','Jiné'];
+const TOGGLE_FIELDS = ['pk','odkaz','individ','alkotest','tonometr','testy','predavk','intox','zdrav','kontprace'];
+
+// ===== INIT =====
+window.onload = () => {
+  // Set today's date
+  document.getElementById('start-date').valueAsDate = new Date();
+  // Init all toggles to 'no'
+  TOGGLE_FIELDS.forEach(f => { toggleStates[f] = 'no'; });
+  renderSavedActions();
+};
+
+// ===== STORAGE =====
+// ===== STORAGE - iOS compatible =====
+let _memStore = [];
+
+function getActions() {
+  try {
+    const ls = localStorage.getItem('hr_actions');
+    if (ls) return JSON.parse(ls);
+  } catch(e) {}
+  try {
+    const ss = sessionStorage.getItem('hr_actions');
+    if (ss) return JSON.parse(ss);
+  } catch(e) {}
+  return _memStore;
+}
+
+function saveActions(actions) {
+  _memStore = actions;
+  try { localStorage.setItem('hr_actions', JSON.stringify(actions)); } catch(e) {}
+  try { sessionStorage.setItem('hr_actions', JSON.stringify(actions)); } catch(e) {}
+}
+function saveCurrentAction() {
+  if (!currentAction) return;
+  const actions = getActions();
+  const idx = actions.findIndex(a => a.id === currentAction.id);
+  const data = { ...currentAction, records };
+  if (idx >= 0) actions[idx] = data; else actions.push(data);
+  saveActions(actions);
+}
+
+// ===== START SCREEN =====
+function renderSavedActions() {
+  const list = document.getElementById('saved-actions-list');
+  const actions = getActions();
+  if (!actions.length) {
+    list.innerHTML = '<div style="color:var(--text2);font-size:13px;">Žádné uložené akce</div>';
+    return;
+  }
+  list.innerHTML = actions.map((a, i) => `
+    <div class="saved-action-item" onclick="loadAction('${a.id}')">
+      <div>
+        <div class="saved-action-name">${a.name}</div>
+        <div class="saved-action-meta">${a.date} · ${a.place} · ${(a.records||[]).length} záznamů</div>
+      </div>
+      <button class="saved-action-del" onclick="event.stopPropagation();deleteAction('${a.id}')">✕</button>
+    </div>
+  `).join('');
+}
+
+function startNewAction() {
+  const name = document.getElementById('start-name').value.trim();
+  const date = document.getElementById('start-date').value;
+  const place = document.getElementById('start-place').value.trim();
+  const workers = document.getElementById('start-workers').value.trim();
+  if (!name || !date || !place || !workers) {
+    showToast('Vyplň údaje o akci.');
+    return;
+  }
+  const awareness = document.getElementById('awareness').checked;
+  const finalName = awareness ? 'AWA - ' + name : name;
+  currentAction = { id: Date.now().toString(), name: finalName, date, place, workers, records: [] };
+  records = [];
+  saveCurrentAction();
+  showApp();
+}
+
+function loadAction(id) {
+  const actions = getActions();
+  const a = actions.find(x => x.id === id);
+  if (!a) return;
+  currentAction = a;
+  records = a.records || [];
+  showApp();
+}
+
+function deleteAction(id) {
+  if (!confirm('Smazat akci?')) return;
+  const actions = getActions().filter(a => a.id !== id);
+  saveActions(actions);
+  renderSavedActions();
+}
+
+function goHome() {
+  saveCurrentAction();
+  document.getElementById('screen-app').classList.remove('active');
+  document.getElementById('screen-start').classList.add('active');
+  renderSavedActions();
+}
+
+function showApp() {
+  document.getElementById('screen-start').classList.remove('active');
+  document.getElementById('screen-app').classList.add('active');
+  document.getElementById('topbar-name').textContent = currentAction.name;
+  document.getElementById('topbar-date').textContent = currentAction.date + (currentAction.place ? ' · ' + currentAction.place : '');
+  resetForm();
+  switchTab('form');
+  updateCount();
+}
+
+// ===== TABS =====
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['form','table','report'][i] === tab);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  if (tab === 'table') renderTable();
+  if (tab === 'report') renderReport();
+}
+
+function checkOutOdm(el) {
+  const typ = document.querySelector('input[name="typ"]:checked');
+  if (typ && typ.value === 'Odmítnutý') {
+    el.value = '';
+    showToast('U odmítnutého kontaktu nezadávej žádné výkony.');
+  }
+}
+
+function checkOdmNow() {
+  const typ = document.querySelector('input[name="typ"]:checked');
+  if (typ && typ.value === 'Odmítnutý') {
+    showToast('U odmítnutého kontaktu nezadávej žádné výkony.');
+    return true;
+  }
+  return false;
+}
+
+function handleTypChange() {
+  const typ = document.querySelector('input[name="typ"]:checked');
+  const isOdm = typ && typ.value === 'Odmítnutý';
+  // Disable/enable all form elements except pohlaví and typ
+  const formContainer = document.getElementById('tab-form');
+  const allInputs = formContainer.querySelectorAll('input[type="checkbox"], input[type="number"], .toggle-btn.yes');
+  allInputs.forEach(el => {
+    el.dataset.odmBlocked = isOdm ? '1' : '0';
+  });
+}
+
+function checkOdmBlocked(el) {
+  if (el && el.dataset.odmBlocked === '1') {
+    showToast('U odmítnutého kontaktu nezadávej žádné výkony.');
+    return true;
+  }
+  return false;
+}
+
+
+function toggleField(field, val) {
+  // Block everything if odmítnutý
+  if (val === 'yes') {
+    const typ = document.querySelector('input[name="typ"]:checked');
+    if (typ && typ.value === 'Odmítnutý') {
+      showToast('U odmítnutého kontaktu nezadávej žádné výkony.');
+      return;
+    }
+  }
+  // Prevent prvokontakt = yes when typ = Opakovaný
+  if (field === 'pk' && val === 'yes') {
+    const typ = document.querySelector('input[name="typ"]:checked');
+    if (typ && typ.value === 'Opakovaný') {
+      showToast('Opakovaný kontakt nemůže být prvokontakt.');
+      return;
+    }
+  }
+  toggleStates[field] = val;
+  document.getElementById(field+'-yes').classList.toggle('active', val === 'yes');
+  document.getElementById(field+'-no').classList.toggle('active', val === 'no');
+  const det = document.getElementById(field+'-detail');
+  if (det) det.classList.toggle('visible', val === 'yes');
+}
+
+function quickSave(pohlavi) {
+  const r = {
+    id: Date.now().toString(),
+    ts: new Date().toISOString(),
+    pohlavi,
+    typ: 'Opakovaný',
+    out: 0,
+    pk: false,
+    hr: ['Vitamíny / Voda'],
+    info: [],
+    odkaz: false, odkazText: '',
+    individ: false, individText: '',
+    alkotest: false, tonometr: false, testy: false,
+    predavk: false, predavkText: '',
+    intox: false, zdrav: false, kontprace: false,
+    drogy: [], drogyJine: '',
+  };
+  records.push(r);
+  saveCurrentAction();
+  updateCount();
+
+  const isMuz = pohlavi === 'M';
+  const btn = document.getElementById(isMuz ? 'quick-m' : 'quick-z');
+  const origBg = isMuz ? 'rgba(71,180,255,0.12)' : 'rgba(200,80,255,0.12)';
+  const origBorder = isMuz ? '1px solid rgba(71,180,255,0.4)' : '1px solid rgba(200,80,255,0.4)';
+  const origColor = isMuz ? 'var(--accent2)' : '#c850ff';
+  const origMHTML = `<span>Muž — opak. kontakt · Ovoce/Voda</span>`;
+  const origZHTML = `<span>Žena — opak. kontakt · Ovoce/Voda</span>`;
+  const origHTML = isMuz ? origMHTML : origZHTML;
+
+  btn.innerHTML = `<span style="font-size:22px">✓</span>`;
+  btn.style.background = 'rgba(71,255,120,0.2)';
+  btn.style.border = '1px solid #47ff78';
+  btn.style.color = '#47ff78';
+
+  setTimeout(() => {
+    btn.innerHTML = origHTML;
+    btn.style.background = origBg;
+    btn.style.border = origBorder;
+    btn.style.color = origColor;
+  }, 700);
+}
+
+
+function readForm() {
+  const pohlavi = document.querySelector('input[name="pohlavi"]:checked');
+  const typ = document.querySelector('input[name="typ"]:checked');
+  const hr = [1,2,3,4,5,6,7,8,9].filter(i => document.getElementById('hr'+i).checked).map(i => HR_LABELS[i-1]);
+  const info = [1,2,3,4,5,6,7,8].filter(i => document.getElementById('info'+i).checked).map(i => INFO_LABELS[i-1]);
+  const drogy = DRUGS.filter(d => document.getElementById('d-'+d).checked);
+  return {
+    pohlavi: pohlavi ? pohlavi.value : '',
+    typ: typ ? typ.value : '',
+    out: parseInt(document.getElementById('out').value) || 0,
+    pk: toggleStates.pk === 'yes',
+    hr, info,
+    odkaz: toggleStates.odkaz === 'yes',
+    odkazText: document.getElementById('odkaz-text').value.trim(),
+    individ: toggleStates.individ === 'yes',
+    individText: document.getElementById('individ-text').value.trim(),
+    alkotest: toggleStates.alkotest === 'yes',
+    tonometr: toggleStates.tonometr === 'yes',
+    testy: toggleStates.testy === 'yes',
+    predavk: toggleStates.predavk === 'yes',
+    predavkText: document.getElementById('predavk-text').value.trim(),
+    intox: toggleStates.intox === 'yes',
+    zdrav: toggleStates.zdrav === 'yes',
+    kontprace: toggleStates.kontprace === 'yes',
+    drogy,
+    drogyJine: document.getElementById('d-jine-text').value.trim(),
+  };
+}
+
+// ===== SAVE RECORD =====
+function saveRecord() {
+  const r = readForm();
+  if (!r.pohlavi || !r.typ) {
+    if (r.pohlavi && !r.typ) { showToast('Chybí typ kontaktu — klient, opakovaný nebo odmítnutý.'); return; }
+    if (!r.pohlavi && r.typ) { showToast('Chybí pohlaví.'); return; }
+    showToast('Vyplň pohlaví a typ kontaktu.');
+    return;
+  }
+  if (r.typ !== 'Odmítnutý') {
+    const hasSomething = r.out > 0 || r.hr.length > 0 || r.info.length > 0 ||
+      r.odkaz || r.individ || r.alkotest || r.tonometr || r.testy ||
+      r.predavk || r.intox || r.zdrav || r.kontprace;
+    if (!hasSomething) {
+      showToast('Není zadán žádný výkon.');
+      return;
+    }
+  }
+  const multiply = Math.max(1, parseInt(document.getElementById('multiply').value) || 1);
+  for (let i = 0; i < multiply; i++) {
+    records.push({ ...r, id: Date.now().toString() + i, ts: new Date().toISOString() });
+  }
+  saveCurrentAction();
+  updateCount();
+  resetForm();
+  document.getElementById('tab-form').scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // flash feedback
+  const btn = document.querySelector('.btn-primary');
+  const orig = btn.textContent;
+  btn.textContent = multiply > 1 ? `✓ Uloženo ${multiply}×!` : '✓ Uloženo!';
+  btn.style.background = '#47ff78';
+  setTimeout(() => { btn.textContent = orig; btn.style.background = ''; }, 800);
+}
+
+function updateCount() {
+  document.getElementById('topbar-count').textContent = records.length;
+}
+
+// ===== RESET FORM =====
+function resetForm() {
+  document.querySelectorAll('input[name="pohlavi"]').forEach(r => r.checked = false);
+  document.querySelectorAll('input[name="typ"]').forEach(r => r.checked = false);
+  document.getElementById('out').value = '';
+  [1,2,3,4,5,6,7,8,9].forEach(i => { document.getElementById('hr'+i).checked = false; });
+  [1,2,3,4,5,6,7,8].forEach(i => { document.getElementById('info'+i).checked = false; });
+  DRUGS.forEach(d => { document.getElementById('d-'+d).checked = false; });
+  document.getElementById('drogy-jine-wrap').classList.remove('visible');
+  document.getElementById('d-jine-text').value = '';
+  document.getElementById('multiply').value = 1;
+  document.getElementById('odkaz-text').value = '';
+  document.getElementById('individ-text').value = '';
+  document.getElementById('predavk-text').value = '';
+  TOGGLE_FIELDS.forEach(f => toggleField(f, 'no'));
+}
+
+// ===== RENDER TABLE =====
+function renderTable() {
+  const wrap = document.getElementById('table-wrapper');
+  if (!records.length) {
+    wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">◎</div><div class="empty-state-text">Zatím žádné záznamy</div></div>';
+    return;
+  }
+  const rows = records.map((r, i) => {
+    const typClass = r.typ === 'Klient' ? 'td-type-klient' : r.typ === 'Odmítnutý' ? 'td-type-odm' : 'td-type-kontakt';
+    const hrChips = (r.hr||[]).map(h => `<span class="td-chip">${h}</span>`).join('');
+    const infoChips = (r.info||[]).map(h => `<span class="td-chip green">${h}</span>`).join('');
+    const drogyChips = (r.drogy||[]).map(d => `<span class="td-chip yellow">${DRUG_LABELS[DRUGS.indexOf(d)]||d}</span>`).join('');
+    const bool = v => v ? '<span style="color:var(--accent2)">✓</span>' : '<span style="color:var(--border)">—</span>';
+    return `<tr>
+      <td style="color:var(--text2)">${i+1}.</td>
+      <td>${r.pohlavi}</td>
+      <td class="${typClass}">${r.typ}</td>
+      <td>${r.pk ? '<span style="color:var(--accent)">✓</span>' : '—'}</td>
+      <td>${r.out || '—'}</td>
+      <td>${hrChips || '—'}</td>
+      <td>${infoChips || '—'}</td>
+      <td>${r.odkaz ? (r.odkazText||'Ano') : '—'}</td>
+      <td>${r.individ ? (r.individText||'Ano') : '—'}</td>
+      <td>${bool(r.alkotest)}</td>
+      <td>${bool(r.tonometr)}</td>
+      <td>${bool(r.testy)}</td>
+      <td>${r.predavk ? `<span style="color:var(--accent3)">✓${r.predavkText?' ('+r.predavkText+')':''}</span>` : '—'}</td>
+      <td>${bool(r.intox)}</td>
+      <td>${bool(r.zdrav)}</td>
+      <td>${bool(r.kontprace)}</td>
+      <td>${drogyChips || '—'}${r.drogyJine ? ' <em style="color:var(--text2)">'+r.drogyJine+'</em>' : ''}</td>
+      <td class="td-actions">
+        <button class="row-edit-btn" onclick="openEdit(${i})">✎</button>
+        <button class="row-del-btn" onclick="deleteRecord(${i})">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+  wrap.innerHTML = `<table>
+    <thead><tr>
+      <th>Č.</th><th>M/Ž</th><th>Typ</th><th>PK</th><th>OUT</th>
+      <th>HR materiál</th><th>Info servis</th><th>Odkaz</th><th>Individ.</th>
+      <th>Alko</th><th>Tono</th><th>Testy</th><th>Předávk.</th>
+      <th>Intox.</th><th>Zdrav.</th><th>Kont.práce</th><th>Drogy</th><th>Akce</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function deleteRecord(i) {
+  showConfirm('Smazat záznam č. ' + (i+1) + '?', () => {
+    records.splice(i, 1);
+    saveCurrentAction();
+    updateCount();
+    renderTable();
+    showToast('Záznam smazán.');
+  });
+}
+
+function exportTableExcel() {
+  if (!records.length) { alert('Žádné záznamy k exportu.'); return; }
+  const header = ['Č.','M/Ž','Typ','PK','OUT','HR materiál','Info servis','Odkaz','Odkaz - popis','Individ. porad.','Individ. - popis','Alkotest','Tonometr','Výdej test kitu','Předávkování','Předávk. - detail','Řeš. akut. intox.','Zdrav. ošetření','Kontakt. práce','Primární drogy','Drogy - jiné'];
+  const rows = records.map((r,i) => [
+    i+1, r.pohlavi, r.typ, r.pk?'Ano':'', r.out||'',
+    (r.hr||[]).join(', '), (r.info||[]).join(', '),
+    r.odkaz?'Ano':'', r.odkazText,
+    r.individ?'Ano':'', r.individText,
+    r.alkotest?'Ano':'', r.tonometr?'Ano':'', r.testy?'Ano':'',
+    r.predavk?'Ano':'', r.predavkText,
+    r.intox?'Ano':'', r.zdrav?'Ano':'', r.kontprace?'Ano':'',
+    (r.drogy||[]).map(d => DRUG_LABELS[DRUGS.indexOf(d)]||d).join(', '),
+    r.drogyJine
+  ]);
+  const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+  ws['!cols'] = header.map(() => ({ wch: 18 }));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Záznamy');
+  XLSX.writeFile(wb, `Výkaz_${currentAction.name}_${currentAction.date}.xlsx`);
+}
+
+function openEdit(i) {
+  editingIdx = i;
+  const r = records[i];
+  const hrChecks = [1,2,3,4,5,6,7,8,9].map(n => {
+    const checked = r.hr.includes(HR_LABELS[n-1]) ? 'checked' : '';
+    return `<div><input type="checkbox" id="ehr${n}" ${checked} class="check-option"><label for="ehr${n}" class="check-label">${n}. ${HR_LABELS[n-1]}</label></div>`;
+  }).join('');
+  const infoChecks = [1,2,3,4,5,6,7,8].map(n => {
+    const checked = r.info.includes(INFO_LABELS[n-1]) ? 'checked' : '';
+    return `<div><input type="checkbox" id="einfo${n}" ${checked} class="check-option"><label for="einfo${n}" class="check-label">${n}. ${INFO_LABELS[n-1]}</label></div>`;
+  }).join('');
+  const drogyChecks = DRUGS.map((d, di) => {
+    const checked = r.drogy.includes(d) ? 'checked' : '';
+    return `<div><input type="checkbox" id="ed-${d}" ${checked} class="check-option"><label for="ed-${d}" class="check-label">${DRUG_LABELS[di]}</label></div>`;
+  }).join('');
+  const yesno = (field, val) => `
+    <button class="toggle-btn yes ${val?'active':''}" id="e${field}-yes" onclick="eToggle('${field}','yes')">Ano</button>
+    <button class="toggle-btn no ${!val?'active':''}" id="e${field}-no" onclick="eToggle('${field}','no')">Ne</button>`;
+  document.getElementById('modal-form-content').innerHTML = `
+    <div class="form-section">
+      <label>Pohlaví</label>
+      <div class="radio-group">
+        <input type="radio" name="ep" id="ep-m" value="M" class="radio-option" ${r.pohlavi==='M'?'checked':''}><label for="ep-m" class="radio-label">♂ Muž</label>
+        <input type="radio" name="ep" id="ep-z" value="Ž" class="radio-option" ${r.pohlavi==='Ž'?'checked':''}><label for="ep-z" class="radio-label">♀ Žena</label>
+      </div>
+    </div>
+    <div class="form-section">
+      <label>Typ kontaktu</label>
+      <div class="radio-group">
+        <input type="radio" name="et" id="et-k" value="Klient" class="radio-option" ${r.typ==='Klient'?'checked':''}><label for="et-k" class="radio-label">Klient</label>
+        <input type="radio" name="et" id="et-o" value="Opakovaný" class="radio-option" ${r.typ==='Opakovaný'?'checked':''}><label for="et-o" class="radio-label">Opakovaný kontakt</label>
+        <input type="radio" name="et" id="et-d" value="Odmítnutý" class="radio-option" ${r.typ==='Odmítnutý'?'checked':''}><label for="et-d" class="radio-label">Odmítnutý kontakt</label>
+      </div>
+    </div>
+    <div class="form-section"><label>Vydané stříkačky (OUT)</label><input type="number" id="e-out" value="${r.out||''}" min="0" style="width:120px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:14px;padding:10px 14px;outline:none;"></div>
+    <div class="form-section"><label style="margin-bottom:8px;">Prvokontakt</label><div class="toggle-btns">${yesno('pk', r.pk)}</div></div>
+    <div class="form-section"><div class="form-section-title">HR Materiál</div><div class="checkbox-grid">${hrChecks}</div></div>
+    <div class="form-section"><div class="form-section-title">Informační servis</div><div class="checkbox-grid">${infoChecks}</div></div>
+    <div class="form-section"><label style="margin-bottom:8px;">Odkaz do služby</label><div class="toggle-btns">${yesno('eodkaz', r.odkaz)}</div><div class="conditional-field ${r.odkaz?'visible':''}" id="eeodkaz-detail" style="margin-top:8px;"><input type="text" id="e-odkaz-text" value="${r.odkazText||''}" placeholder="Popis odkazu..."></div></div>
+    <div class="form-section"><label style="margin-bottom:8px;">Individuální poradenství</label><div class="toggle-btns">${yesno('eindivid', r.individ)}</div><div class="conditional-field ${r.individ?'visible':''}" id="eeindivid-detail" style="margin-top:8px;"><input type="text" id="e-individ-text" value="${r.individText||''}" placeholder="Popis poradenství..."></div></div>
+    <div class="form-section">
+      <div class="toggle-row"><span class="toggle-label-text">Alkotest</span><div class="toggle-btns">${yesno('ealkotest', r.alkotest)}</div></div>
+      <div class="toggle-row"><span class="toggle-label-text">Tonometr</span><div class="toggle-btns">${yesno('etonometr', r.tonometr)}</div></div>
+      <div class="toggle-row"><span class="toggle-label-text">Výdej testovacího kitu</span><div class="toggle-btns">${yesno('etesty', r.testy)}</div></div>
+    </div>
+    <div class="form-section"><label style="margin-bottom:8px;">Předávkování</label><div class="toggle-btns">${yesno('epredavk', r.predavk)}</div><div class="conditional-field ${r.predavk?'visible':''}" id="eepredavk-detail" style="margin-top:8px;"><input type="text" id="e-predavk-text" value="${r.predavkText||''}" placeholder="Detaily..."></div></div>
+    <div class="form-section">
+      <div class="toggle-row"><span class="toggle-label-text">Řešení akutní intoxikace</span><div class="toggle-btns">${yesno('eintox', r.intox)}</div></div>
+      <div class="toggle-row"><span class="toggle-label-text">Zdravotní ošetření</span><div class="toggle-btns">${yesno('ezdrav', r.zdrav)}</div></div>
+      <div class="toggle-row"><span class="toggle-label-text">Kontaktní práce</span><div class="toggle-btns">${yesno('ekontprace', r.kontprace)}</div></div>
+    </div>
+    <div class="form-section"><div class="form-section-title">Primární drogy</div><div class="checkbox-grid">${drogyChecks}</div><div style="margin-top:10px;"><label>Jiné — upřesnění</label><input type="text" id="e-drogy-jine" value="${r.drogyJine||''}" placeholder="Upřesněte..."></div></div>
+  `;
+  window._eToggles = {
+    pk: r.pk, eodkaz: r.odkaz, eindivid: r.individ,
+    ealkotest: r.alkotest, etonometr: r.tonometr, etesty: r.testy,
+    epredavk: r.predavk, eintox: r.intox, ezdrav: r.zdrav, ekontprace: r.kontprace
+  };
+  document.getElementById('edit-modal').classList.add('active');
+}
+
+function eToggle(field, val) {
+  window._eToggles[field] = val === 'yes';
+  document.getElementById('e'+field+'-yes').classList.toggle('active', val === 'yes');
+  document.getElementById('e'+field+'-no').classList.toggle('active', val === 'no');
+  const det = document.getElementById('ee'+field+'-detail');
+  if (det) det.classList.toggle('visible', val === 'yes');
+}
+
+function closeModal() {
+  document.getElementById('edit-modal').classList.remove('active');
+  editingIdx = null;
+}
+
+function saveEdit() {
+  if (editingIdx === null) return;
+  const t = window._eToggles;
+  const pohlavi = document.querySelector('input[name="ep"]:checked');
+  const typ = document.querySelector('input[name="et"]:checked');
+  const hr = [1,2,3,4,5,6,7,8,9].filter(n => document.getElementById('ehr'+n)?.checked).map(n => HR_LABELS[n-1]);
+  const info = [1,2,3,4,5,6,7,8].filter(n => document.getElementById('einfo'+n)?.checked).map(n => INFO_LABELS[n-1]);
+  const drogy = DRUGS.filter(d => document.getElementById('ed-'+d)?.checked);
+  records[editingIdx] = {
+    ...records[editingIdx],
+    pohlavi: pohlavi ? pohlavi.value : records[editingIdx].pohlavi,
+    typ: typ ? typ.value : records[editingIdx].typ,
+    out: parseInt(document.getElementById('e-out').value) || 0,
+    pk: t.pk, hr, info,
+    odkaz: t.eodkaz, odkazText: document.getElementById('e-odkaz-text')?.value.trim()||'',
+    individ: t.eindivid, individText: document.getElementById('e-individ-text')?.value.trim()||'',
+    alkotest: t.ealkotest, tonometr: t.etonometr, testy: t.etesty,
+    predavk: t.epredavk, predavkText: document.getElementById('e-predavk-text')?.value.trim()||'',
+    intox: t.eintox, zdrav: t.ezdrav, kontprace: t.ekontprace,
+    drogy, drogyJine: document.getElementById('e-drogy-jine')?.value.trim()||'',
+  };
+  saveCurrentAction();
+  closeModal();
+  renderTable();
+}
+
+// ===== REPORT =====
+function calcReport() {
+  const isKlient = r => r.typ === 'Klient';
+  const isOpak = r => r.typ === 'Opakovaný';
+  const isOdm = r => r.typ === 'Odmítnutý';
+  const c = (fn) => records.filter(fn).length;
+  const sum = (fn) => records.reduce((a,r) => a + fn(r), 0);
+
+  return {
+    ivKlienti: c(r => isKlient(r) && r.out > 0),
+    outCelkem: sum(r => r.out),
+    klientosetkani: c(r => isKlient(r) || isOpak(r)),
+    klienti: c(isKlient),
+    prvokontakty: c(r => r.pk),
+    hrCelkem: sum(r => r.hr.length),
+    klientHr: c(r => isKlient(r) && r.hr.length > 0),
+    infoCelkem: sum(r => r.info.length),
+    klientInfo: c(r => isKlient(r) && r.info.length > 0),
+    odkazyCelkem: c(r => r.odkaz),
+    individCelkem: c(r => r.individ),
+    alkotestCelkem: c(r => r.alkotest),
+    tonometrCelkem: c(r => r.tonometr),
+    testyKitCelkem: c(r => r.testy),
+    predavkCelkem: c(r => r.predavk),
+    intoxCelkem: c(r => r.intox),
+    zdravCelkem: c(r => r.zdrav),
+    kontpraceCelkem: c(r => r.kontprace),
+    kontpraceKlienti: c(r => isKlient(r) && r.kontprace),
+    klientiMuzi: c(r => isKlient(r) && r.pohlavi === 'M'),
+    klientiZeny: c(r => isKlient(r) && r.pohlavi === 'Ž'),
+    klientiDrogy: c(r => isKlient(r) && r.drogy.length > 0),
+    klientkyZenyDrogy: c(r => isKlient(r) && r.pohlavi === 'Ž' && r.drogy.length > 0),
+    klientiBezInfoKont: c(r => isKlient(r) && r.info.length === 0 && !r.kontprace),
+    odmCelkem: c(isOdm),
+    drogy: DRUGS.map(d => c(r => r.drogy.includes(d))),
+  };
+}
+
+function renderReport() {
+  if (!records.length) {
+    document.getElementById('report-content').innerHTML = '<div class="empty-state"><div class="empty-state-icon">◈</div><div class="empty-state-text">Žádná data k zobrazení</div></div>';
+    return;
+  }
+  const s = calcReport();
+  document.getElementById('report-title').textContent = currentAction.name;
+
+  const card = (label, value, cls='') =>
+    `<div class="report-card"><div class="report-card-label">${label}</div><div class="report-card-value ${cls}">${value}</div></div>`;
+
+  document.getElementById('report-content').innerHTML = `
+    <div class="report-section-title">Základní přehledy</div>
+    <div class="report-grid">
+      ${card('Klientosetkání', s.klientosetkani)}
+      ${card('Klienti', s.klienti)}
+      ${card('Opakované kontakty', s.klientosetkani - s.klienti, 'blue')}
+      ${card('Prvokontakty', s.prvokontakty)}
+      ${card('Odmítnuté kontakty', s.odmCelkem, 'red')}
+    </div>
+
+    <div class="report-section-title">Pohlaví klientů</div>
+    <div class="report-grid">
+      ${card('Klienti — muži', s.klientiMuzi)}
+      ${card('Klienti — ženy', s.klientiZeny)}
+    </div>
+
+    <div class="report-section-title">Stříkačky</div>
+    <div class="report-grid">
+      ${card('i.v. Klienti (OUT > 0)', s.ivKlienti)}
+      ${card('Vydané stříkačky celkem', s.outCelkem)}
+    </div>
+
+    <div class="report-section-title">Harm Reduction</div>
+    <div class="report-grid">
+      ${card('HR materiál — celkem vydaných druhů', s.hrCelkem)}
+      ${card('Klienti s ≥1 HR materiálem', s.klientHr)}
+    </div>
+
+    <div class="report-section-title">Informační servis</div>
+    <div class="report-grid">
+      ${card('Info servis — celkem vydaných témat', s.infoCelkem)}
+      ${card('Klienti s ≥1 info servisem', s.klientInfo)}
+    </div>
+
+    <div class="report-section-title">Poradenství &amp; intervence</div>
+    <div class="report-grid">
+      ${card('Odkaz do služby', s.odkazyCelkem)}
+      ${card('Individuální poradenství', s.individCelkem)}
+      ${card('Alkotest', s.alkotestCelkem)}
+      ${card('Tonometr', s.tonometrCelkem)}
+      ${card('Výdej testovacího kitu', s.testyKitCelkem)}
+      ${card('CO test', '—', 'blue')}
+      ${card('Předávkování', s.predavkCelkem, s.predavkCelkem > 0 ? 'red' : '')}
+      ${card('Řešení akutní intoxikace', s.intoxCelkem, s.intoxCelkem > 0 ? 'red' : '')}
+      ${card('Zdravotní ošetření', s.zdravCelkem)}
+      ${card('Kontaktní práce — celkem', s.kontpraceCelkem)}
+      ${card('Kontaktní práce — klienti', s.kontpraceKlienti)}
+    </div>
+
+    <div class="report-section-title">Drogy</div>
+    <div class="report-grid">
+      ${card('Klienti s ≥1 drogou', s.klientiDrogy)}
+      ${card('Klientky ženy s ≥1 drogou', s.klientkyZenyDrogy)}
+      ${card('Klienti bez info servisu ani kont. práce', s.klientiBezInfoKont)}
+    </div>
+    <div class="drugs-grid">
+      ${DRUG_LABELS.map((label, i) => `
+        <div class="drug-card">
+          <span class="drug-name">${label}</span>
+          <span class="drug-count">${s.drogy[i]}</span>
+        </div>`).join('')}
+    </div>
+  `;
+}
+
+// ===== EXPORTS =====
+function exportTableExcel() {
+  if (!records.length) { alert('Žádné záznamy k exportu.'); return; }
+  const header = ['Č.','M/Ž','Typ','PK','OUT','HR materiál','Info servis','Odkaz','Odkaz - popis','Individ. porad.','Individ. - popis','Alkotest','Tonometr','Výdej test kitu','Předávkování','Předávk. - detail','Řeš. akut. intox.','Zdrav. ošetření','Kontakt. práce','Primární drogy','Drogy - jiné'];
+  const rows = records.map((r,i) => [
+    i+1, r.pohlavi, r.typ, r.pk?'Ano':'', r.out||'',
+    r.hr.join(', '), r.info.join(', '),
+    r.odkaz?'Ano':'', r.odkazText,
+    r.individ?'Ano':'', r.individText,
+    r.alkotest?'Ano':'', r.tonometr?'Ano':'', r.testy?'Ano':'',
+    r.predavk?'Ano':'', r.predavkText,
+    r.intox?'Ano':'', r.zdrav?'Ano':'', r.kontprace?'Ano':'',
+    r.drogy.map(d => DRUG_LABELS[DRUGS.indexOf(d)]||d).join(', '),
+    r.drogyJine
+  ]);
+  const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+  ws['!cols'] = header.map(() => ({ wch: 18 }));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Záznamy');
+  XLSX.writeFile(wb, `Výkaz_${currentAction.name}_${currentAction.date}.xlsx`);
+}
+
+function exportReportExcel() {
+  if (!records.length) { alert('Žádné záznamy k exportu.'); return; }
+  const s = calcReport();
+  const akceInfo = [currentAction.date, currentAction.name, currentAction.place, currentAction.workers].filter(Boolean).join(' | ');
+  const header = [
+    'Akce',
+    'i.v. Klienti', 'Vydané stříkačky celkem',
+    'Klientosetkání', 'Klienti', 'Prvokontakty',
+    'HR materiál — celkem', 'Klienti s ≥1 HR materiálem',
+    'Info servis — celkem', 'Klienti s ≥1 info servisem',
+    'Odkaz do služby', 'Individuální poradenství',
+    'Alkotest', 'Tonometr', 'Výdej testovacího kitu', 'CO test',
+    'Předávkování', 'Řešení akutní intoxikace', 'Zdravotní ošetření',
+    'Kontaktní práce — celkem', 'Kontaktní práce — klienti',
+    'Klienti — muži', 'Klienti — ženy',
+    'Klienti s ≥1 drogou', 'Klientky ženy s ≥1 drogou',
+    'Klienti bez info servisu ani kont. práce', 'Odmítnuté kontakty',
+    ...DRUG_LABELS,
+  ];
+  const values = [
+    akceInfo,
+    s.ivKlienti, s.outCelkem,
+    s.klientosetkani, s.klienti, s.prvokontakty,
+    s.hrCelkem, s.klientHr,
+    s.infoCelkem, s.klientInfo,
+    s.odkazyCelkem, s.individCelkem,
+    s.alkotestCelkem, s.tonometrCelkem, s.testyKitCelkem, '',
+    s.predavkCelkem, s.intoxCelkem, s.zdravCelkem,
+    s.kontpraceCelkem, s.kontpraceKlienti,
+    s.klientiMuzi, s.klientiZeny,
+    s.klientiDrogy, s.klientkyZenyDrogy,
+    s.klientiBezInfoKont, s.odmCelkem,
+    ...s.drogy,
+  ];
+  const ws = XLSX.utils.aoa_to_sheet([header, values]);
+  ws['!cols'] = header.map((h, i) => ({ wch: i === 0 ? 40 : 22 }));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Report');
+  const notesRows = [['Č. řádku', 'Typ', 'Obsah']];
+  records.forEach((r, i) => {
+    if (r.odkaz && r.odkazText) notesRows.push([i+1, 'Odkaz do služby', r.odkazText]);
+    if (r.individ && r.individText) notesRows.push([i+1, 'Individuální poradenství', r.individText]);
+    if (r.predavk && r.predavkText) notesRows.push([i+1, 'Předávkování', r.predavkText]);
+  });
+  const ws2 = XLSX.utils.aoa_to_sheet(notesRows);
+  ws2['!cols'] = [{ wch: 12 }, { wch: 26 }, { wch: 60 }];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Poznámky');
+  const jineRows = [['Č. řádku', 'Jiné drogy — upřesnění']];
+  records.forEach((r, i) => {
+    if (r.drogy.includes('jine') && r.drogyJine) jineRows.push([i+1, r.drogyJine]);
+  });
+  const ws3 = XLSX.utils.aoa_to_sheet(jineRows);
+  ws3['!cols'] = [{ wch: 12 }, { wch: 60 }];
+  XLSX.utils.book_append_sheet(wb, ws3, 'Jiné drogy');
+  XLSX.writeFile(wb, `Report_${currentAction.name}_${currentAction.date}.xlsx`);
+}
+</script>
+</body>
+</html>

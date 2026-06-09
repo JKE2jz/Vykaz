@@ -990,32 +990,52 @@
 <div id="toast" class="toast"></div>
 
 <script>
+let activeRecognition = null;
+
 function startVoice(fieldId) {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
     showToast('Na iPhone použij 🎤 na klávesnici pro hlasový vstup.');
     return;
   }
+
+  const micId = 'mic-' + fieldId.replace('-text', '');
+  const btn = document.getElementById(micId);
+
+  // Pokud už nahrává — zastav
+  if (activeRecognition) {
+    activeRecognition.stop();
+    activeRecognition = null;
+    if (btn) { btn.textContent = '🎤'; btn.style.color = ''; btn.style.borderColor = ''; }
+    return;
+  }
+
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   const recognition = new SR();
   recognition.lang = 'cs-CZ';
   recognition.interimResults = false;
   recognition.maxAlternatives = 1;
+  recognition.continuous = true;
 
-  const micId = 'mic-' + fieldId.replace('-text', '');
-  const btn = document.getElementById(micId);
+  activeRecognition = recognition;
   if (btn) { btn.textContent = '⏹'; btn.style.color = 'var(--accent3)'; btn.style.borderColor = 'var(--accent3)'; }
 
   recognition.onresult = (e) => {
-    const transcript = e.results[0][0].transcript;
     const field = document.getElementById(fieldId);
-    field.value = (field.value ? field.value + ' ' : '') + transcript;
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) {
+        field.value = (field.value ? field.value + ' ' : '') + e.results[i][0].transcript;
+      }
+    }
   };
-  recognition.onerror = (e) => { 
+  recognition.onerror = (e) => {
     if (e.error === 'not-allowed') showToast('Povol přístup k mikrofonu v nastavení prohlížeče.');
     else if (e.error === 'network') showToast('Hlasový vstup vyžaduje připojení k internetu.');
-    else showToast('Hlasový vstup se nezdařil: ' + e.error); 
+    else showToast('Hlasový vstup se nezdařil: ' + e.error);
+    activeRecognition = null;
+    if (btn) { btn.textContent = '🎤'; btn.style.color = ''; btn.style.borderColor = ''; }
   };
   recognition.onend = () => {
+    activeRecognition = null;
     if (btn) { btn.textContent = '🎤'; btn.style.color = ''; btn.style.borderColor = ''; }
   };
   recognition.start();

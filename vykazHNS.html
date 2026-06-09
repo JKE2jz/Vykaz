@@ -617,6 +617,7 @@
 
     <div style="font-size:12px;color:var(--accent);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px;font-weight:500;">Uložené akce:</div>
     <div id="saved-actions-list" class="saved-actions"></div>
+    <div style="text-align:right;font-size:11px;color:var(--text2);margin-top:16px;">© 2026 Hard &amp; Smart</div>
   </div>
 </div>
 
@@ -1177,6 +1178,8 @@ function showApp() {
   resetForm();
   switchTab('form');
   updateCount();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.getElementById('tab-form').scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ===== TABS =====

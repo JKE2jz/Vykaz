@@ -1157,10 +1157,11 @@ function loadAction(id) {
 }
 
 function deleteAction(id) {
-  if (!confirm('Smazat akci?')) return;
-  const actions = getActions().filter(a => a.id !== id);
-  saveActions(actions);
-  renderSavedActions();
+  showConfirm('Smazat tuto akci a všechna její data?', () => {
+    const actions = getActions().filter(a => a.id !== id);
+    saveActions(actions);
+    renderSavedActions();
+  });
 }
 
 function goHome() {

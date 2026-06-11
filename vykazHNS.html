@@ -581,6 +581,12 @@
     transform: translateX(-50%) translateY(0);
   }
 
+  @keyframes fadeCheck {
+    0% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: 1; transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
 </style>
 </head>
 <body>
@@ -645,10 +651,10 @@
       <!-- RYCHLÉ ZKRATKY -->
       <div style="display:flex;gap:10px;margin-bottom:16px;">
         <button class="btn" onclick="quickSave('M')" id="quick-m" style="flex:1;justify-content:center;background:rgba(71,180,255,0.12);border:1px solid rgba(71,180,255,0.4);color:var(--accent2);font-size:10px;font-weight:700;padding:17px 6px;gap:8px;line-height:1.3;white-space:nowrap;">
-          <span>Muž — opak. kontakt · Ovoce/Voda</span>
+          <span>Muž — op. kontakt · Ovoce/Voda</span>
         </button>
         <button class="btn" onclick="quickSave('Ž')" id="quick-z" style="flex:1;justify-content:center;background:rgba(200,80,255,0.12);border:1px solid rgba(200,80,255,0.4);color:#c850ff;font-size:10px;font-weight:700;padding:17px 6px;gap:8px;line-height:1.3;white-space:nowrap;">
-          <span>Žena — opak. kontakt · Ovoce/Voda</span>
+          <span>Žena — op. kontakt · Ovoce/Voda</span>
         </button>
       </div>
       <div class="form-section">
@@ -743,7 +749,7 @@
             <textarea id="odkaz-text" placeholder="Popis odkazu..." style="padding-right:44px;"></textarea>
             <button type="button" onclick="startVoice('odkaz-text')" id="mic-odkaz" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--text2);font-size:32px;">🎤</button>
           </div>
-          <div style="font-size:11px;color:var(--text2);margin-top:4px;">Na iPhone použij 🎤 na klávesnici</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px;">Na iPhone klikni do textového pole a použij 🎤 na klávesnici</div>
         </div>
       </div>
 
@@ -763,7 +769,7 @@
             <textarea id="individ-text" placeholder="Popis poradenství..." style="padding-right:44px;"></textarea>
             <button type="button" onclick="startVoice('individ-text')" id="mic-individ" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--text2);font-size:32px;">🎤</button>
           </div>
-          <div style="font-size:11px;color:var(--text2);margin-top:4px;">Na iPhone použij 🎤 na klávesnici</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px;">Na iPhone klikni do textového pole a použij 🎤 na klávesnici</div>
         </div>
       </div>
 
@@ -809,7 +815,7 @@
             <textarea id="predavk-text" placeholder="Popis situace..." style="padding-right:44px;"></textarea>
             <button type="button" onclick="startVoice('predavk-text')" id="mic-predavk" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--text2);font-size:32px;">🎤</button>
           </div>
-          <div style="font-size:11px;color:var(--text2);margin-top:4px;">Na iPhone použij 🎤 na klávesnici</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px;">Na iPhone klikni do textového pole a použij 🎤 na klávesnici</div>
         </div>
       </div>
 
@@ -877,7 +883,13 @@
           <div class="form-section-title" style="margin-bottom:4px;font-size:13px;">Násobit dotazník</div>
           <div style="font-size:12px;color:var(--text2);">Počet stejných záznamů k uložení</div>
         </div>
-        <input type="number" id="multiply" min="1" value="1" style="width:80px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:'DM Sans',sans-serif;font-size:20px;font-weight:600;padding:10px 14px;outline:none;text-align:center;">
+        <div style="display:flex;align-items:center;gap:0;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+          <input type="number" id="multiply" min="1" value="1" style="width:60px;background:var(--surface2);border:none;border-right:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:20px;font-weight:600;padding:8px 6px;outline:none;text-align:center;">
+          <div style="display:flex;flex-direction:column;">
+            <button onclick="changeMultiply(1)" style="background:var(--surface2);border:none;border-bottom:1px solid var(--border);color:var(--text);font-size:13px;padding:4px 20px;cursor:pointer;line-height:1;">▲</button>
+            <button onclick="changeMultiply(-1)" style="background:var(--surface2);border:none;color:var(--text);font-size:13px;padding:4px 20px;cursor:pointer;line-height:1;">▼</button>
+          </div>
+        </div>
       </div>
 
       <div class="form-actions">
@@ -995,7 +1007,7 @@ let activeRecognition = null;
 
 function startVoice(fieldId) {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    showToast('Na iPhone použij 🎤 na klávesnici pro hlasový vstup.');
+    showToast('Na iPhone klikni do textového pole a použij 🎤 na klávesnici pro hlasový vstup.');
     return;
   }
 
@@ -1281,8 +1293,8 @@ function quickSave(pohlavi) {
   const origBg = isMuz ? 'rgba(71,180,255,0.12)' : 'rgba(200,80,255,0.12)';
   const origBorder = isMuz ? '1px solid rgba(71,180,255,0.4)' : '1px solid rgba(200,80,255,0.4)';
   const origColor = isMuz ? 'var(--accent2)' : '#c850ff';
-  const origMHTML = `<span>Muž — opak. kontakt · Ovoce/Voda</span>`;
-  const origZHTML = `<span>Žena — opak. kontakt · Ovoce/Voda</span>`;
+  const origMHTML = `<span>Muž — op. kontakt · Ovoce/Voda</span>`;
+  const origZHTML = `<span>Žena — op. kontakt · Ovoce/Voda</span>`;
   const origHTML = isMuz ? origMHTML : origZHTML;
 
   btn.innerHTML = `<span style="font-size:22px">✓</span>`;
@@ -1352,15 +1364,36 @@ function saveRecord() {
   }
   saveCurrentAction();
   updateCount();
-  resetForm();
-  document.getElementById('tab-form').scrollTo({ top: 0, behavior: 'smooth' });
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  // flash feedback
+
+  // flash feedback na tlačítku
   const btn = document.querySelector('.btn-primary');
   const orig = btn.textContent;
   btn.textContent = multiply > 1 ? `✓ Uloženo ${multiply}×!` : '✓ Uloženo!';
   btn.style.background = '#47ff78';
-  setTimeout(() => { btn.textContent = orig; btn.style.background = ''; }, 800);
+  btn.style.color = '#0f0f13';
+
+  // Fajfka na celém formuláři
+  const formContainer = document.getElementById('tab-form');
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(71,255,120,0.12);display:flex;align-items:center;justify-content:center;z-index:500;pointer-events:none;';
+  overlay.innerHTML = '<div style="font-size:80px;animation:fadeCheck 0.5s ease;">✓</div>';
+  document.body.appendChild(overlay);
+
+  setTimeout(() => {
+    btn.textContent = orig;
+    btn.style.background = '';
+    btn.style.color = '';
+    overlay.remove();
+    resetForm();
+    document.getElementById('tab-form').scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, 500);
+}
+
+function changeMultiply(delta) {
+  const el = document.getElementById('multiply');
+  const current = parseInt(el.value) || 1;
+  el.value = Math.max(1, current + delta);
 }
 
 function updateCount() {

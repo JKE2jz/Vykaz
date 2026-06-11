@@ -26,7 +26,7 @@
   body {
     font-family: 'DM Sans', sans-serif;
     background: var(--bg);
-    color: var(--text);
+    color: #c0c0cc;
     min-height: 100vh;
     font-size: 14px;
   }
@@ -80,7 +80,7 @@
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    color: var(--text);
+    color: #c0c0cc;
     font-family: 'DM Sans', sans-serif;
     font-size: 14px;
     padding: 10px 14px;
@@ -147,7 +147,7 @@
   .btn-primary:hover { background: #d4eb30; }
   .btn-secondary {
     background: var(--surface2);
-    color: var(--text);
+    color: #c0c0cc;
     border: 1px solid var(--border);
   }
   .btn-secondary:hover { border-color: var(--accent2); color: var(--accent2); }
@@ -258,6 +258,7 @@
     padding: 8px 14px;
     cursor: pointer;
     font-size: 13px;
+    color: #c0c0cc;
     transition: all 0.15s;
     user-select: none;
   }
@@ -283,6 +284,7 @@
     padding: 8px 12px;
     cursor: pointer;
     font-size: 13px;
+    color: #c0c0cc;
     transition: all 0.15s;
     user-select: none;
   }
@@ -316,7 +318,7 @@
     border-bottom: 1px solid var(--border);
   }
   .toggle-row:last-child { border-bottom: none; }
-  .toggle-label-text { font-size: 13px; }
+  .toggle-label-text { font-size: 13px; color: var(--text); }
   .toggle-btns { display: flex; gap: 6px; }
   .toggle-btn {
     padding: 5px 14px;
@@ -352,7 +354,7 @@
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    color: var(--text);
+    color: #c0c0cc;
     font-family: 'DM Sans', sans-serif;
     font-size: 16px;
     padding: 10px 14px;
@@ -474,7 +476,7 @@
   }
   .report-card-label {
     font-size: 11px;
-    color: var(--text2);
+    color: #c0c0cc;
     margin-bottom: 6px;
     line-height: 1.3;
   }
@@ -630,18 +632,20 @@
 <!-- ===== APP SCREEN ===== -->
 <div id="screen-app" class="screen">
   <div class="topbar">
-    <div>
-      <div class="topbar-name" id="topbar-name">—</div>
+    <div style="flex:1;min-width:0;">
+      <div class="topbar-name" id="topbar-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">—</div>
       <div class="topbar-date" id="topbar-date">—</div>
     </div>
-    <div class="topbar-count">Záznamy: <span id="topbar-count">0</span></div>
-    <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px;" onclick="goHome()">← Domů</button>
+    <button onclick="switchToNextAction()" style="background:none;border:1px solid rgba(232,255,71,0.6);border-radius:6px;color:rgba(232,255,71,0.6);font-size:11px;font-weight:600;padding:6px 16px;cursor:pointer;white-space:nowrap;flex-shrink:0;">→ Další akce</button>
+    <div class="topbar-count" style="flex-shrink:0;">Záznamy: <span id="topbar-count">0</span></div>
+    <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px;flex-shrink:0;" onclick="goHome()">← Zpět</button>
   </div>
 
   <div class="tabs">
     <div class="tab active" onclick="switchTab('form')">✦ Zadání</div>
     <div class="tab" onclick="switchTab('table')">▤ Tabulka</div>
     <div class="tab" onclick="switchTab('report')">◈ Report</div>
+    <div id="awareness-badge" style="display:none;margin-left:auto;align-self:center;padding:4px 10px;border-top:2px solid rgba(255,100,100,0.7);border-bottom:2px solid rgba(255,100,100,0.7);color:rgba(255,100,100,0.9);font-size:11px;font-weight:700;letter-spacing:0.5px;margin-right:12px;">TENTO výkaz je AWARENESS</div>
   </div>
 
   <!-- FORM TAB -->
@@ -791,6 +795,13 @@
           </div>
         </div>
         <div class="toggle-row">
+          <span class="toggle-label-text">CO test</span>
+          <div class="toggle-btns">
+            <button class="toggle-btn yes" id="cotest-yes" onclick="toggleField('cotest','yes')">Ano</button>
+            <button class="toggle-btn no active" id="cotest-no" onclick="toggleField('cotest','no')">Ne</button>
+          </div>
+        </div>
+        <div class="toggle-row">
           <span class="toggle-label-text">Výdej testovacího kitu</span>
           <div class="toggle-btns">
             <button class="toggle-btn yes" id="testy-yes" onclick="toggleField('testy','yes')">Ano</button>
@@ -821,7 +832,7 @@
 
       <!-- SEKCE 13-14 -->
       <div class="form-section">
-        <div class="form-section-title">13–14 — Intervence</div>
+        <div class="form-section-title">13–14 — DALŠÍ INTERVENCE</div>
         <div class="toggle-row">
           <span class="toggle-label-text">Řešení akutní intoxikace</span>
           <div class="toggle-btns">
@@ -860,7 +871,6 @@
           <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-extaze" class="check-option"><label for="d-extaze" class="check-label">Extáze</label></div>
           <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-kokain" class="check-option"><label for="d-kokain" class="check-label">Kokain</label></div>
           <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-mefedron" class="check-option"><label for="d-mefedron" class="check-label">Mefedron / Katinony</label></div>
-          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-speed" class="check-option"><label for="d-speed" class="check-label">Speed</label></div>
           <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-lsd" class="check-option"><label for="d-lsd" class="check-label">LSD</label></div>
           <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-lysohlavky" class="check-option"><label for="d-lysohlavky" class="check-label">Lysohlávky</label></div>
           <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-pervitin" class="check-option"><label for="d-pervitin" class="check-label">Pervitin</label></div>
@@ -869,7 +879,6 @@
           <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-kratom" class="check-option"><label for="d-kratom" class="check-label">Kratom</label></div>
           <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-ketamin" class="check-option"><label for="d-ketamin" class="check-label">Ketamin</label></div>
           <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-leky" class="check-option"><label for="d-leky" class="check-label">Léky na předpis</label></div>
-          <div><input type="checkbox" onclick="if(this.checked && checkOdmNow()){this.checked=false;}" id="d-kanabinoidy" class="check-option"><label for="d-kanabinoidy" class="check-label">Další kanabinoidy</label></div>
           <div><input type="checkbox" id="d-jine" class="check-option" onchange="document.getElementById('drogy-jine-wrap').classList.toggle('visible', this.checked); if(!this.checked) document.getElementById('d-jine-text').value='';"><label for="d-jine" class="check-label">Jiné</label></div>
         </div>
         <div class="conditional-field" id="drogy-jine-wrap">
@@ -1078,11 +1087,11 @@ let records = [];
 let editingIdx = null;
 let toggleStates = {};
 
-const DRUGS = ['alkohol','tabak','thc','extaze','kokain','mefedron','speed','lsd','lysohlavky','pervitin','poppers','heroin','kratom','ketamin','leky','kanabinoidy','jine'];
-const DRUG_LABELS = ['Alkohol','Tabák','THC','Extáze','Kokain','Mefedron/Katinony','Speed','LSD','Lysohlávky','Pervitin','Poppers','Heroin','Kratom','Ketamin','Léky na předpis','Další kanabinoidy','Jiné'];
+const DRUGS = ['alkohol','tabak','thc','extaze','kokain','mefedron','lsd','lysohlavky','pervitin','poppers','heroin','kratom','ketamin','leky','jine'];
+const DRUG_LABELS = ['Alkohol','Tabák','THC','Extáze','Kokain','Mefedron/Katinony','LSD','Lysohlávky','Pervitin','Poppers','Heroin','Kratom','Ketamin','Léky na předpis','Jiné'];
 const HR_LABELS = ['Leták','Kondomy','Špunty','Filtry','Šňupátka/Kapsle','Vitamíny/Voda','Mat. k i.v. aplik.','Žvýkačky','Jiný'];
 const INFO_LABELS = ['Bezpečnější užívání','Bezpečný sex','Vitamíny/Dehydratace','Ochrana sluchu','Alko/Tono/CO info','Bezpečná přeprava','Další zdrav./soc.','Jiné'];
-const TOGGLE_FIELDS = ['pk','odkaz','individ','alkotest','tonometr','testy','predavk','intox','zdrav','kontprace'];
+const TOGGLE_FIELDS = ['pk','odkaz','individ','alkotest','tonometr','cotest','testy','predavk','intox','zdrav','kontprace'];
 
 // ===== INIT =====
 window.onload = () => {
@@ -1176,8 +1185,25 @@ function deleteAction(id) {
   });
 }
 
-function goHome() {
+function switchToNextAction() {
   saveCurrentAction();
+  const actions = getActions();
+  if (actions.length <= 1) { showToast('Žádná další akce.'); return; }
+  const idx = actions.findIndex(a => a.id === currentAction.id);
+  const next = actions[(idx + 1) % actions.length];
+  currentAction = next;
+  records = next.records || [];
+  document.getElementById('topbar-name').textContent = currentAction.name;
+  document.getElementById('topbar-date').textContent = currentAction.date + (currentAction.place ? ' · ' + currentAction.place : '');
+  const badge = document.getElementById('awareness-badge');
+  if (badge) badge.style.display = currentAction.name.startsWith('AWA') ? 'block' : 'none';
+  updateCount();
+  resetForm();
+  switchTab('form');
+  showToast('Přepnuto: ' + currentAction.name);
+}
+
+function goHome() {
   document.getElementById('screen-app').classList.remove('active');
   document.getElementById('screen-start').classList.add('active');
   renderSavedActions();
@@ -1188,6 +1214,8 @@ function showApp() {
   document.getElementById('screen-app').classList.add('active');
   document.getElementById('topbar-name').textContent = currentAction.name;
   document.getElementById('topbar-date').textContent = currentAction.date + (currentAction.place ? ' · ' + currentAction.place : '');
+  const badge = document.getElementById('awareness-badge');
+  if (badge) badge.style.display = currentAction.name.startsWith('AWA') ? 'block' : 'none';
   resetForm();
   switchTab('form');
   updateCount();
@@ -1329,6 +1357,7 @@ function readForm() {
     individText: document.getElementById('individ-text').value.trim(),
     alkotest: toggleStates.alkotest === 'yes',
     tonometr: toggleStates.tonometr === 'yes',
+    cotest: toggleStates.cotest === 'yes',
     testy: toggleStates.testy === 'yes',
     predavk: toggleStates.predavk === 'yes',
     predavkText: document.getElementById('predavk-text').value.trim(),
@@ -1351,7 +1380,7 @@ function saveRecord() {
   }
   if (r.typ !== 'Odmítnutý') {
     const hasSomething = r.out > 0 || r.hr.length > 0 || r.info.length > 0 ||
-      r.odkaz || r.individ || r.alkotest || r.tonometr || r.testy ||
+      r.odkaz || r.individ || r.alkotest || r.tonometr || r.cotest || r.testy ||
       r.predavk || r.intox || r.zdrav || r.kontprace;
     if (!hasSomething) {
       showToast('Není zadán žádný výkon.');
@@ -1387,7 +1416,7 @@ function saveRecord() {
     resetForm();
     document.getElementById('tab-form').scrollTo({ top: 0, behavior: 'smooth' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, 500);
+  }, 200);
 }
 
 function changeMultiply(delta) {
@@ -1442,6 +1471,7 @@ function renderTable() {
       <td>${r.individ ? (r.individText||'Ano') : '—'}</td>
       <td>${bool(r.alkotest)}</td>
       <td>${bool(r.tonometr)}</td>
+      <td>${bool(r.cotest)}</td>
       <td>${bool(r.testy)}</td>
       <td>${r.predavk ? `<span style="color:var(--accent3)">✓${r.predavkText?' ('+r.predavkText+')':''}</span>` : '—'}</td>
       <td>${bool(r.intox)}</td>
@@ -1458,7 +1488,7 @@ function renderTable() {
     <thead><tr>
       <th>Č.</th><th>M/Ž</th><th>Typ</th><th>PK</th><th>OUT</th>
       <th>HR materiál</th><th>Info servis</th><th>Odkaz</th><th>Individ.</th>
-      <th>Alko</th><th>Tono</th><th>Testy</th><th>Předávk.</th>
+      <th>Alko</th><th>Tono</th><th>CO</th><th>Testy</th><th>Předávk.</th>
       <th>Intox.</th><th>Zdrav.</th><th>Kont.práce</th><th>Drogy</th><th>Akce</th>
     </tr></thead>
     <tbody>${rows}</tbody>
@@ -1477,13 +1507,13 @@ function deleteRecord(i) {
 
 function exportTableExcel() {
   if (!records.length) { alert('Žádné záznamy k exportu.'); return; }
-  const header = ['Č.','M/Ž','Typ','PK','OUT','HR materiál','Info servis','Odkaz','Odkaz - popis','Individ. porad.','Individ. - popis','Alkotest','Tonometr','Výdej test kitu','Předávkování','Předávk. - detail','Řeš. akut. intox.','Zdrav. ošetření','Kontakt. práce','Primární drogy','Drogy - jiné'];
+  const header = ['Č.','M/Ž','Typ','PK','OUT','HR materiál','Info servis','Odkaz','Odkaz - popis','Individ. porad.','Individ. - popis','Alkotest','Tonometr','CO test','Výdej test kitu','Předávkování','Předávk. - detail','Řeš. akut. intox.','Zdrav. ošetření','Kontakt. práce','Primární drogy','Drogy - jiné'];
   const rows = records.map((r,i) => [
     i+1, r.pohlavi, r.typ, r.pk?'Ano':'', r.out||'',
     (r.hr||[]).join(', '), (r.info||[]).join(', '),
     r.odkaz?'Ano':'', r.odkazText,
     r.individ?'Ano':'', r.individText,
-    r.alkotest?'Ano':'', r.tonometr?'Ano':'', r.testy?'Ano':'',
+    r.alkotest?'Ano':'', r.tonometr?'Ano':'', r.cotest?'Ano':'', r.testy?'Ano':'',
     r.predavk?'Ano':'', r.predavkText,
     r.intox?'Ano':'', r.zdrav?'Ano':'', r.kontprace?'Ano':'',
     (r.drogy||[]).map(d => DRUG_LABELS[DRUGS.indexOf(d)]||d).join(', '),
@@ -1539,6 +1569,7 @@ function openEdit(i) {
     <div class="form-section">
       <div class="toggle-row"><span class="toggle-label-text">Alkotest</span><div class="toggle-btns">${yesno('ealkotest', r.alkotest)}</div></div>
       <div class="toggle-row"><span class="toggle-label-text">Tonometr</span><div class="toggle-btns">${yesno('etonometr', r.tonometr)}</div></div>
+      <div class="toggle-row"><span class="toggle-label-text">CO test</span><div class="toggle-btns">${yesno('ecotest', r.cotest)}</div></div>
       <div class="toggle-row"><span class="toggle-label-text">Výdej testovacího kitu</span><div class="toggle-btns">${yesno('etesty', r.testy)}</div></div>
     </div>
     <div class="form-section"><label style="margin-bottom:8px;">Předávkování</label><div class="toggle-btns">${yesno('epredavk', r.predavk)}</div><div class="conditional-field ${r.predavk?'visible':''}" id="eepredavk-detail" style="margin-top:8px;"><input type="text" id="e-predavk-text" value="${r.predavkText||''}" placeholder="Detaily..."></div></div>
@@ -1551,7 +1582,7 @@ function openEdit(i) {
   `;
   window._eToggles = {
     pk: r.pk, eodkaz: r.odkaz, eindivid: r.individ,
-    ealkotest: r.alkotest, etonometr: r.tonometr, etesty: r.testy,
+    ealkotest: r.alkotest, etonometr: r.tonometr, ecotest: r.cotest, etesty: r.testy,
     epredavk: r.predavk, eintox: r.intox, ezdrav: r.zdrav, ekontprace: r.kontprace
   };
   document.getElementById('edit-modal').classList.add('active');
@@ -1586,7 +1617,7 @@ function saveEdit() {
     pk: t.pk, hr, info,
     odkaz: t.eodkaz, odkazText: document.getElementById('e-odkaz-text')?.value.trim()||'',
     individ: t.eindivid, individText: document.getElementById('e-individ-text')?.value.trim()||'',
-    alkotest: t.ealkotest, tonometr: t.etonometr, testy: t.etesty,
+    alkotest: t.ealkotest, tonometr: t.etonometr, cotest: t.ecotest, testy: t.etesty,
     predavk: t.epredavk, predavkText: document.getElementById('e-predavk-text')?.value.trim()||'',
     intox: t.eintox, zdrav: t.ezdrav, kontprace: t.ekontprace,
     drogy, drogyJine: document.getElementById('e-drogy-jine')?.value.trim()||'',
@@ -1618,6 +1649,7 @@ function calcReport() {
     individCelkem: c(r => r.individ),
     alkotestCelkem: c(r => r.alkotest),
     tonometrCelkem: c(r => r.tonometr),
+    cotestCelkem: c(r => r.cotest),
     testyKitCelkem: c(r => r.testy),
     predavkCelkem: c(r => r.predavk),
     intoxCelkem: c(r => r.intox),
@@ -1685,8 +1717,8 @@ function renderReport() {
       ${card('Individuální poradenství', s.individCelkem)}
       ${card('Alkotest', s.alkotestCelkem)}
       ${card('Tonometr', s.tonometrCelkem)}
+      ${card('CO test', s.cotestCelkem)}
       ${card('Výdej testovacího kitu', s.testyKitCelkem)}
-      ${card('CO test', '—', 'blue')}
       ${card('Předávkování', s.predavkCelkem, s.predavkCelkem > 0 ? 'red' : '')}
       ${card('Řešení akutní intoxikace', s.intoxCelkem, s.intoxCelkem > 0 ? 'red' : '')}
       ${card('Zdravotní ošetření', s.zdravCelkem)}
@@ -1713,13 +1745,13 @@ function renderReport() {
 // ===== EXPORTS =====
 function exportTableExcel() {
   if (!records.length) { alert('Žádné záznamy k exportu.'); return; }
-  const header = ['Č.','M/Ž','Typ','PK','OUT','HR materiál','Info servis','Odkaz','Odkaz - popis','Individ. porad.','Individ. - popis','Alkotest','Tonometr','Výdej test kitu','Předávkování','Předávk. - detail','Řeš. akut. intox.','Zdrav. ošetření','Kontakt. práce','Primární drogy','Drogy - jiné'];
+  const header = ['Č.','M/Ž','Typ','PK','OUT','HR materiál','Info servis','Odkaz','Odkaz - popis','Individ. porad.','Individ. - popis','Alkotest','Tonometr','CO test','Výdej test kitu','Předávkování','Předávk. - detail','Řeš. akut. intox.','Zdrav. ošetření','Kontakt. práce','Primární drogy','Drogy - jiné'];
   const rows = records.map((r,i) => [
     i+1, r.pohlavi, r.typ, r.pk?'Ano':'', r.out||'',
     r.hr.join(', '), r.info.join(', '),
     r.odkaz?'Ano':'', r.odkazText,
     r.individ?'Ano':'', r.individText,
-    r.alkotest?'Ano':'', r.tonometr?'Ano':'', r.testy?'Ano':'',
+    r.alkotest?'Ano':'', r.tonometr?'Ano':'', r.cotest?'Ano':'', r.testy?'Ano':'',
     r.predavk?'Ano':'', r.predavkText,
     r.intox?'Ano':'', r.zdrav?'Ano':'', r.kontprace?'Ano':'',
     r.drogy.map(d => DRUG_LABELS[DRUGS.indexOf(d)]||d).join(', '),
@@ -1743,7 +1775,7 @@ function exportReportExcel() {
     'HR materiál — celkem', 'Klienti s ≥1 HR materiálem',
     'Info servis — celkem', 'Klienti s ≥1 info servisem',
     'Odkaz do služby', 'Individuální poradenství',
-    'Alkotest', 'Tonometr', 'Výdej testovacího kitu', 'CO test',
+    'Alkotest', 'Tonometr', 'CO test', 'Výdej testovacího kitu',
     'Předávkování', 'Řešení akutní intoxikace', 'Zdravotní ošetření',
     'Kontaktní práce — celkem', 'Kontaktní práce — klienti',
     'Klienti — muži', 'Klienti — ženy',
@@ -1758,7 +1790,7 @@ function exportReportExcel() {
     s.hrCelkem, s.klientHr,
     s.infoCelkem, s.klientInfo,
     s.odkazyCelkem, s.individCelkem,
-    s.alkotestCelkem, s.tonometrCelkem, s.testyKitCelkem, '',
+    s.alkotestCelkem, s.tonometrCelkem, s.cotestCelkem, s.testyKitCelkem,
     s.predavkCelkem, s.intoxCelkem, s.zdravCelkem,
     s.kontpraceCelkem, s.kontpraceKlienti,
     s.klientiMuzi, s.klientiZeny,

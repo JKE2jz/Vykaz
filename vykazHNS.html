@@ -169,11 +169,9 @@
   .topbar {
     background: var(--surface);
     border-bottom: 1px solid var(--border);
-    padding: 0 20px;
     display: flex;
     align-items: center;
     gap: 12px;
-    height: 52px;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -632,21 +630,23 @@
 
 <!-- ===== APP SCREEN ===== -->
 <div id="screen-app" class="screen">
-  <div class="topbar">
-    <div style="flex:1;min-width:0;">
+  <div class="topbar" style="flex-direction:column;height:auto;padding:8px 20px;gap:6px;">
+    <div style="display:flex;align-items:center;width:100%;gap:8px;">
       <div class="topbar-name" id="topbar-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">—</div>
-      <div class="topbar-date" id="topbar-date">—</div>
+      <div class="topbar-date" id="topbar-date" style="white-space:nowrap;flex-shrink:0;"></div>
     </div>
-    <button onclick="switchToNextAction()" style="background:none;border:1px solid rgba(232,255,71,0.6);border-radius:6px;color:rgba(232,255,71,0.6);font-size:11px;font-weight:600;padding:6px 16px;cursor:pointer;white-space:nowrap;flex-shrink:0;">→ Další akce</button>
-    <div class="topbar-count" style="flex-shrink:0;">Záznamy: <span id="topbar-count">0</span></div>
-    <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px;flex-shrink:0;" onclick="goHome()">← Zpět</button>
+    <div style="display:flex;align-items:center;width:100%;gap:8px;">
+      <button onclick="switchToNextAction()" style="background:none;border:1px solid rgba(232,255,71,0.6);border-radius:6px;color:rgba(232,255,71,0.6);font-size:11px;font-weight:600;padding:4px 16px;cursor:pointer;white-space:nowrap;flex-shrink:0;">→ Další akce</button>
+      <div id="awareness-badge" style="display:none;padding:3px 8px;border-top:2px solid rgba(255,100,100,0.7);border-bottom:2px solid rgba(255,100,100,0.7);color:rgba(255,100,100,0.9);font-size:10px;font-weight:700;white-space:nowrap;margin:0 auto;">TENTO výkaz je AWARENESS</div>
+      <div class="topbar-count" style="margin-left:auto;flex-shrink:0;">Záznamy: <span id="topbar-count">0</span></div>
+      <button class="btn btn-secondary" style="padding:4px 12px;font-size:12px;flex-shrink:0;border:1px solid var(--text2);" onclick="goHome()">← Zpět</button>
+    </div>
   </div>
 
   <div class="tabs">
     <div class="tab active" onclick="switchTab('form')">✦ Zadání</div>
     <div class="tab" onclick="switchTab('table')">▤ Tabulka</div>
     <div class="tab" onclick="switchTab('report')">◈ Report</div>
-    <div id="awareness-badge" style="display:none;margin-left:auto;align-self:center;padding:4px 10px;border-top:2px solid rgba(255,100,100,0.7);border-bottom:2px solid rgba(255,100,100,0.7);color:rgba(255,100,100,0.9);font-size:11px;font-weight:700;letter-spacing:0.5px;margin-right:12px;">TENTO výkaz je AWARENESS</div>
   </div>
 
   <!-- FORM TAB -->
@@ -932,7 +932,7 @@
           <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--text2);margin-bottom:4px;">SOUČTOVÝ REPORT</div>
           <div id="report-title" style="font-size:22px;font-weight:600;"></div>
         </div>
-        <button class="btn btn-secondary" onclick="exportReportExcel()">↓ Export reportu (Excel)</button>
+        <button class="btn" style="background:rgba(232,255,71,0.15);border:1px solid var(--accent);color:var(--accent);font-weight:700;" onclick="exportReportExcel()">↓ Export reportu (Excel)</button>
       </div>
       <div id="report-content"></div>
     </div>
@@ -1201,6 +1201,8 @@ function switchToNextAction() {
   updateCount();
   resetForm();
   switchTab('form');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.getElementById('tab-form').scrollTo({ top: 0, behavior: 'smooth' });
   showToast('Přepnuto: ' + currentAction.name);
 }
 
@@ -1744,27 +1746,6 @@ function renderReport() {
 }
 
 // ===== EXPORTS =====
-function exportTableExcel() {
-  if (!records.length) { alert('Žádné záznamy k exportu.'); return; }
-  const header = ['Č.','M/Ž','Typ','PK','OUT','HR materiál','Info servis','Odkaz','Odkaz - popis','Individ. porad.','Individ. - popis','Alkotest','Tonometr','CO test','Výdej test kitu','Předávkování','Předávk. - detail','Řeš. akut. intox.','Zdrav. ošetření','Kontakt. práce','Primární drogy','Drogy - jiné'];
-  const rows = records.map((r,i) => [
-    i+1, r.pohlavi, r.typ, r.pk?'Ano':'', r.out||'',
-    r.hr.join(', '), r.info.join(', '),
-    r.odkaz?'Ano':'', r.odkazText,
-    r.individ?'Ano':'', r.individText,
-    r.alkotest?'Ano':'', r.tonometr?'Ano':'', r.cotest?'Ano':'', r.testy?'Ano':'',
-    r.predavk?'Ano':'', r.predavkText,
-    r.intox?'Ano':'', r.zdrav?'Ano':'', r.kontprace?'Ano':'',
-    r.drogy.map(d => DRUG_LABELS[DRUGS.indexOf(d)]||d).join(', '),
-    r.drogyJine
-  ]);
-  const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
-  ws['!cols'] = header.map(() => ({ wch: 18 }));
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Záznamy');
-  XLSX.writeFile(wb, `Výkaz_${currentAction.name}_${currentAction.date}.xlsx`);
-}
-
 function exportReportExcel() {
   if (!records.length) { alert('Žádné záznamy k exportu.'); return; }
   const s = calcReport();

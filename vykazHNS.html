@@ -1213,6 +1213,8 @@ const TOGGLE_FIELDS = ['pk','odkaz','individ','alkotest','tonometr','cotest','te
 
 // ===== INIT =====
 window.onload = () => {
+  // Zkontroluj funkčnost úložiště a případně zobraz výstrahu
+  checkStorageHealth();
   // Set today's date
   document.getElementById('start-date').valueAsDate = new Date();
   // Init all toggles to 'no'
@@ -1223,6 +1225,54 @@ window.onload = () => {
 // ===== STORAGE =====
 // ===== STORAGE - iOS compatible =====
 let _memStore = [];
+
+// --- Detekce funkčnosti úložiště + výstražný banner ---
+let _storageStatus = { local: false, session: false, warned: false };
+
+function testStorage(store) {
+  try {
+    const k = '__hr_test__';
+    store.setItem(k, 'ok');
+    const v = store.getItem(k);
+    store.removeItem(k);
+    return v === 'ok';
+  } catch (e) { return false; }
+}
+
+function checkStorageHealth() {
+  try { _storageStatus.local = testStorage(window.localStorage); } catch(e) { _storageStatus.local = false; }
+  try { _storageStatus.session = testStorage(window.sessionStorage); } catch(e) { _storageStatus.session = false; }
+  updateStorageBanner();
+}
+
+function updateStorageBanner() {
+  let banner = document.getElementById('storage-warn-banner');
+  const broken = !_storageStatus.local;
+
+  if (!broken) {
+    if (banner) banner.remove();
+    _storageStatus.warned = false;
+    return;
+  }
+
+  const onlySession = _storageStatus.session; // funguje aspoň sessionStorage
+  const msg = onlySession
+    ? '⚠️ POZOR: Data se neukládají trvale! Záznamy přežijí jen do zavření prohlížeče. Průběžně EXPORTUJ do Excelu (záložka Tabulka / Report).'
+    : '⚠️ POZOR: Úložiště prohlížeče NEFUNGUJE! Data zůstávají jen v paměti — při obnovení nebo zavření stránky se VŠE ZTRATÍ. Ihned po zadávání EXPORTUJ do Excelu!';
+
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'storage-warn-banner';
+    banner.style.cssText = 'background:#8a1c1c;color:#fff;font-size:13px;font-weight:600;line-height:1.4;padding:10px 14px;text-align:center;border-bottom:2px solid #ff6b6b;';
+    document.body.insertBefore(banner, document.body.firstChild);
+  }
+  banner.textContent = msg;
+
+  if (!_storageStatus.warned) {
+    _storageStatus.warned = true;
+    showToast('⚠️ Data se neukládají trvale — nezapomeň exportovat!');
+  }
+}
 
 function getActions() {
   try {
@@ -1238,8 +1288,37 @@ function getActions() {
 
 function saveActions(actions) {
   _memStore = actions;
-  try { localStorage.setItem('hr_actions', JSON.stringify(actions)); } catch(e) {}
-  try { sessionStorage.setItem('hr_actions', JSON.stringify(actions)); } catch(e) {}
+  const json = JSON.stringify(actions);
+  let okLocal = false, okSession = false;
+
+  try {
+    localStorage.setItem('hr_actions', json);
+    okLocal = localStorage.getItem('hr_actions') === json; // ověření, že zápis opravdu proběhl
+  } catch(e) { okLocal = false; }
+
+  try {
+    sessionStorage.setItem('hr_actions', json);
+    okSession = sessionStorage.getItem('hr_actions') === json;
+  } catch(e) { okSession = false; }
+
+  // Pokud se stav úložiště změnil (např. došla kvóta až teď), aktualizuj banner
+  if (okLocal !== _storageStatus.local || okSession !== _storageStatus.session) {
+    _storageStatus.local = okLocal;
+    _storageStatus.session = okSession;
+    updateStorageBanner();
+  } else {
+    _storageStatus.local = okLocal;
+    _storageStatus.session = okSession;
+  }
+
+  if (!okLocal) {
+    // připomínka i při každém dalším uložení, ale ne otravně — toast max 1× za 60 s
+    const now = Date.now();
+    if (!saveActions._lastWarn || now - saveActions._lastWarn > 60000) {
+      saveActions._lastWarn = now;
+      showToast('⚠️ Záznam se NEULOŽIL trvale! Data drž v otevřené stránce a exportuj.');
+    }
+  }
 }
 function saveCurrentAction() {
   if (!currentAction) return;

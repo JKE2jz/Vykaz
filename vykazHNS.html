@@ -42,7 +42,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     --accent2: #47b4ff;
     --accent3: #ff6b6b;
     --text: #f0f0f5;
-    --text2: #9090a8;
+    --text2: #b8b8d0;
     --radius: 8px;
   }
 
@@ -51,7 +51,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   body {
     font-family: 'DM Sans', sans-serif;
     background: var(--bg);
-    color: #c0c0cc;
+    color: #eeeef4;
     min-height: 100vh;
     font-size: 14px;
   }
@@ -105,7 +105,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    color: #c0c0cc;
+    color: #eeeef4;
     font-family: 'DM Sans', sans-serif;
     font-size: 14px;
     padding: 10px 14px;
@@ -172,7 +172,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .btn-primary:hover { background: #d4eb30; }
   .btn-secondary {
     background: var(--surface2);
-    color: #c0c0cc;
+    color: #eeeef4;
     border: 1px solid var(--border);
   }
   .btn-secondary:hover { border-color: var(--accent2); color: var(--accent2); }
@@ -282,7 +282,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     padding: 8px 14px;
     cursor: pointer;
     font-size: 13px;
-    color: #c0c0cc;
+    color: #eeeef4;
     transition: all 0.15s;
     user-select: none;
   }
@@ -308,7 +308,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     padding: 8px 10px;
     cursor: pointer;
     font-size: 11px;
-    color: #c0c0cc;
+    color: #eeeef4;
     transition: all 0.15s;
     user-select: none;
     height: 58px;
@@ -381,7 +381,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    color: #c0c0cc;
+    color: #eeeef4;
     font-family: 'DM Sans', sans-serif;
     font-size: 16px;
     padding: 10px 14px;
@@ -503,7 +503,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
   .report-card-label {
     font-size: 11px;
-    color: #c0c0cc;
+    color: #eeeef4;
     margin-bottom: 6px;
     line-height: 1.3;
   }
@@ -691,6 +691,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   <div id="tab-form" class="tab-content active">
     <div class="form-container">
 
+      <div id="inapp-warn-form" style="display:none;background:rgba(138,28,28,0.9);color:#fff;font-size:12px;font-weight:600;line-height:1.4;padding:10px 14px;border-radius:8px;border:2px solid #ff6b6b;margin-bottom:16px;text-align:center;">⚠️ Otevřeno v Messengeru/Instagramu — export nemusí fungovat. Otevři v Safari/Chrome.</div>
+
       <!-- RYCHLÉ ZKRATKY -->
       <div style="display:flex;gap:10px;margin-bottom:16px;">
         <button class="btn" onclick="quickSave('M')" id="quick-m" style="flex:1;justify-content:center;background:rgba(71,180,255,0.12);border:1px solid rgba(71,180,255,0.4);color:var(--accent2);font-size:10px;font-weight:700;padding:17px 6px;gap:8px;line-height:1.3;white-space:nowrap;">
@@ -705,7 +707,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           <span>01 — Pohlaví &amp; Typ kontaktu</span>
           <span onclick="const h=document.getElementById('help-typ');h.style.display=h.style.display==='none'?'block':'none';" style="width:22px;height:22px;border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--text2);flex-shrink:0;">?</span>
         </div>
-        <div id="help-typ" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#c0c0cc;line-height:1.6;">
+        <div id="help-typ" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#eeeef4;line-height:1.6;">
           Pokud klient chodí na festivalu každý den, už píšeme vždy jen opakovaný kontakt.<br><br>
           Odmítnutý kontakt může být z důvodů:<br>
           1. Agresivita<br>
@@ -752,7 +754,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           <span>03 — Kontaktní práce</span>
           <span onclick="const h=document.getElementById('help-kontprace');h.style.display=h.style.display==='none'?'block':'none';" style="width:22px;height:22px;border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--text2);flex-shrink:0;">?</span>
         </div>
-        <div id="help-kontprace" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#c0c0cc;line-height:1.6;">
+        <div id="help-kontprace" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#eeeef4;line-height:1.6;">
           Představení nabídky služeb a materiálů, ověřování zájmu klienta a definování možné zakázky.
         </div>
         <div class="toggle-row" style="border:none;padding:0;">
@@ -786,7 +788,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           <span>05 — Informační servis</span>
           <span onclick="const h=document.getElementById('help-info');h.style.display=h.style.display==='none'?'block':'none';" style="width:22px;height:22px;border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--text2);flex-shrink:0;">?</span>
         </div>
-        <div id="help-info" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#c0c0cc;line-height:1.6;">
+        <div id="help-info" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#eeeef4;line-height:1.6;">
           1. K alko / tono testům dávat vždy i info — pokud ho nedáte, zaklikne se automaticky při zvolení testování.<br><br>
           2. Info 8 o naší službě znamená například informování o otevírací době, umístění stánku, obecné informace atd. Představování služby, nabídky a ověřování o co má klient zájem je kontaktní práce.
         </div>
@@ -810,7 +812,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           <span>06 — Odkaz do služby</span>
           <span onclick="const h=document.getElementById('help-odkaz');h.style.display=h.style.display==='none'?'block':'none';" style="width:22px;height:22px;border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--text2);flex-shrink:0;">?</span>
         </div>
-        <div id="help-odkaz" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#c0c0cc;line-height:1.6;">
+        <div id="help-odkaz" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#eeeef4;line-height:1.6;">
           Odkazy na konkrétní služby a profesionály dle zakázky klienta. Nespadá sem odkazování na nás jako H&amp;S.
         </div>
         <div class="toggle-row" style="border:none;padding:0 0 10px 0;">
@@ -836,7 +838,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           <span>07 — Individuální poradenství</span>
           <span onclick="const h=document.getElementById('help-individ');h.style.display=h.style.display==='none'?'block':'none';" style="width:22px;height:22px;border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--text2);flex-shrink:0;">?</span>
         </div>
-        <div id="help-individ" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#c0c0cc;line-height:1.6;">
+        <div id="help-individ" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#eeeef4;line-height:1.6;">
           Počítá se sem i hlubší psycho-sociální pomoc u silněji intoxikovaných či depresivních jedinců, při "bad tripu", toxické psychóze či intervenci v jinak krizovějších situacích.<br><br>
           Pokud zadáváte individuál skrz výdej test kitu a neobsahuje žádné důležité informace navíc, lze označit jen položku Výdej testovacího kitu a Individuál se vyplní sám.
         </div>
@@ -863,7 +865,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           <span>08–11 — Testy &amp; měření</span>
           <span onclick="const h=document.getElementById('help-testy');h.style.display=h.style.display==='none'?'block':'none';" style="width:22px;height:22px;border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--text2);flex-shrink:0;">?</span>
         </div>
-        <div id="help-testy" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#c0c0cc;line-height:1.6;">
+        <div id="help-testy" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#eeeef4;line-height:1.6;">
           U výdeje testovacího kitu by mělo vždy dojít k Individuálnímu poradenství a předání informací o testu. Vyplňuje se automaticky. Pokud by to tak nebylo (například pokud by si stejný klient přišel pro druhý test) nebo bylo třeba do individuálu něco dopsat, tak to lze upravit.
         </div>
         <div class="toggle-row">
@@ -903,7 +905,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           <span>12 — Předávkování</span>
           <span onclick="const h=document.getElementById('help-predavk');h.style.display=h.style.display==='none'?'block':'none';" style="width:22px;height:22px;border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--text2);flex-shrink:0;">?</span>
         </div>
-        <div id="help-predavk" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#c0c0cc;line-height:1.6;">
+        <div id="help-predavk" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#eeeef4;line-height:1.6;">
           Lze zaznamenat i předávkování o kterém klient mluví a došlo k němu v minulosti a mohlo se týkat i jiné osoby. Ve všech ostatních případech dávejte prosím současně i Řešení akutní intoxikace.
         </div>
         <div class="toggle-row" style="border:none;padding:0 0 10px 0;">
@@ -914,7 +916,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           </div>
         </div>
         <div class="conditional-field" id="predavk-detail">
-          <label>Napište nejvíce informací o průběhu předávkování</label>
+          <label>Napište co nejvíce informací o průběhu předávkování</label>
           <div style="font-size:11px;color:var(--text2);margin-bottom:6px;line-height:1.5;">datum · místo · věk · pohlaví · látka · hospitalizace · příznaky · následky · zdroj látky · popis situace · užití další osobou</div>
           <div style="position:relative;">
             <textarea id="predavk-text" placeholder="" style="padding-right:44px;"></textarea>
@@ -930,7 +932,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           <span>13 — Řešení akutní intoxikace</span>
           <span onclick="const h=document.getElementById('help-intox');h.style.display=h.style.display==='none'?'block':'none';" style="width:22px;height:22px;border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--text2);flex-shrink:0;">?</span>
         </div>
-        <div id="help-intox" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#c0c0cc;line-height:1.6;">
+        <div id="help-intox" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#eeeef4;line-height:1.6;">
           V práci s klientem musí proběhnout řešení nebo diskuze ohledně jeho fyzického nebo psychického stavu, způsobeného psychoaktivními látkami včetně alkoholu. Nestačí to, že je klient pod vlivem.
         </div>
         <div class="toggle-row" style="border:none;padding:0;">
@@ -948,7 +950,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           <span>14 — Zdravotní ošetření</span>
           <span onclick="const h=document.getElementById('help-zdrav');h.style.display=h.style.display==='none'?'block':'none';" style="width:22px;height:22px;border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--text2);flex-shrink:0;">?</span>
         </div>
-        <div id="help-zdrav" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#c0c0cc;line-height:1.6;">
+        <div id="help-zdrav" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#eeeef4;line-height:1.6;">
           Musí dojít k samotnému ošetření. Pouhé vydání náplastí, obvazů, vitamínů atd. je pouze distribuce HR.
         </div>
         <div class="toggle-row" style="border:none;padding:0;">
@@ -1213,6 +1215,7 @@ const TOGGLE_FIELDS = ['pk','odkaz','individ','alkotest','tonometr','cotest','te
 
 // ===== INIT =====
 window.onload = () => {
+  checkInAppBrowser();
   // Zkontroluj funkčnost úložiště a případně zobraz výstrahu
   checkStorageHealth();
   // Set today's date
@@ -1237,6 +1240,13 @@ function testStorage(store) {
     store.removeItem(k);
     return v === 'ok';
   } catch (e) { return false; }
+}
+
+function checkInAppBrowser() {
+  const ua = navigator.userAgent || '';
+  const isInApp = /FBAN|FBAV|Instagram|Messenger|Line|MicroMessenger/i.test(ua);
+  const el = document.getElementById('inapp-warn-form');
+  if (el) el.style.display = isInApp ? 'block' : 'none';
 }
 
 function checkStorageHealth() {
@@ -1409,6 +1419,7 @@ function goHome() {
 }
 
 function showApp() {
+  checkInAppBrowser();
   document.getElementById('screen-start').classList.remove('active');
   document.getElementById('screen-app').classList.add('active');
   document.getElementById('topbar-name').textContent = currentAction.name;

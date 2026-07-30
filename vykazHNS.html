@@ -871,28 +871,28 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <div class="toggle-row">
           <span class="toggle-label-text">Alkotest</span>
           <div class="toggle-btns">
-            <button class="toggle-btn yes" id="alkotest-yes" onclick="toggleField('alkotest','yes');autoCheckInfo5();">Ano</button>
+            <button class="toggle-btn yes" id="alkotest-yes" onclick="const t=document.querySelector('input[name=&quot;typ&quot;]:checked'); const blocked=t&&t.value==='Odmítnutý'; toggleField('alkotest','yes'); if(!blocked){try{autoCheckInfo5();}catch(e){} try{const a=document.getElementById('d-alkohol'); if(a&&!a.checked)a.checked=true;}catch(e){}}">Ano</button>
             <button class="toggle-btn no active" id="alkotest-no" onclick="toggleField('alkotest','no')">Ne</button>
           </div>
         </div>
         <div class="toggle-row">
           <span class="toggle-label-text">Tonometr</span>
           <div class="toggle-btns">
-            <button class="toggle-btn yes" id="tonometr-yes" onclick="toggleField('tonometr','yes');autoCheckInfo5();">Ano</button>
+            <button class="toggle-btn yes" id="tonometr-yes" onclick="const t=document.querySelector('input[name=&quot;typ&quot;]:checked'); const blocked=t&&t.value==='Odmítnutý'; toggleField('tonometr','yes'); if(!blocked)autoCheckInfo5();">Ano</button>
             <button class="toggle-btn no active" id="tonometr-no" onclick="toggleField('tonometr','no')">Ne</button>
           </div>
         </div>
         <div class="toggle-row">
           <span class="toggle-label-text">CO test</span>
           <div class="toggle-btns">
-            <button class="toggle-btn yes" id="cotest-yes" onclick="toggleField('cotest','yes');autoCheckInfo5();">Ano</button>
+            <button class="toggle-btn yes" id="cotest-yes" onclick="const t=document.querySelector('input[name=&quot;typ&quot;]:checked'); const blocked=t&&t.value==='Odmítnutý'; toggleField('cotest','yes'); if(!blocked)autoCheckInfo5();">Ano</button>
             <button class="toggle-btn no active" id="cotest-no" onclick="toggleField('cotest','no')">Ne</button>
           </div>
         </div>
         <div class="toggle-row">
           <span class="toggle-label-text">Výdej testovacího kitu</span>
           <div class="toggle-btns">
-            <button class="toggle-btn yes" id="testy-yes" onclick="toggleField('testy','yes');autoTestyActions();">Ano</button>
+            <button class="toggle-btn yes" id="testy-yes" onclick="const t=document.querySelector('input[name=&quot;typ&quot;]:checked'); const blocked=t&&t.value==='Odmítnutý'; toggleField('testy','yes'); if(!blocked)autoTestyActions();">Ano</button>
             <button class="toggle-btn no active" id="testy-no" onclick="toggleField('testy','no');document.getElementById('testy-warn').style.display='none';">Ne</button>
           </div>
         </div>

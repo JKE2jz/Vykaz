@@ -662,7 +662,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
     <div style="font-size:12px;color:var(--accent);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px;font-weight:500;">Uložené akce:</div>
     <div id="saved-actions-list" class="saved-actions"></div>
-    <div style="text-align:right;font-size:11px;color:var(--text2);margin-top:16px;">© 2026 Hard &amp; Smart</div>
+    <div style="text-align:right;font-size:11px;color:var(--text2);margin-top:16px;">© 2026 Jiří Klíma</div>
   </div>
 </div>
 
@@ -676,6 +676,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     <div style="display:flex;align-items:center;width:100%;gap:8px;">
       <button onclick="switchToNextAction()" style="background:none;border:1px solid rgba(232,255,71,0.6);border-radius:6px;color:rgba(232,255,71,0.6);font-size:11px;font-weight:600;padding:4px 16px;cursor:pointer;white-space:nowrap;flex-shrink:0;">→ Další akce</button>
       <div id="awareness-badge" style="display:none;padding:3px 8px;border-top:2px solid rgba(255,100,100,0.7);border-bottom:2px solid rgba(255,100,100,0.7);color:rgba(255,100,100,0.9);font-size:10px;font-weight:700;white-space:nowrap;margin:0 auto;">TENTO výkaz je AWARENESS</div>
+      <div id="daily-message-badge" style="display:none;padding:3px 8px;border-top:2px solid rgba(71,255,120,0.6);border-bottom:2px solid rgba(71,255,120,0.6);color:rgba(71,255,120,0.9);font-size:10px;font-weight:700;white-space:nowrap;margin:0 auto;">Nezapomínejte rozdávat dotazníky spokojenosti</div>
       <div class="topbar-count" style="margin-left:auto;flex-shrink:0;">Záznamy: <span id="topbar-count">0</span></div>
       <button class="btn btn-secondary" style="padding:4px 12px;font-size:12px;flex-shrink:0;border:1px solid var(--text2);" onclick="goHome()">← Zpět</button>
     </div>
@@ -1406,7 +1407,10 @@ function switchToNextAction() {
   document.getElementById('topbar-name').textContent = currentAction.name;
   document.getElementById('topbar-date').textContent = currentAction.date + (currentAction.place ? ' · ' + currentAction.place : '');
   const badge = document.getElementById('awareness-badge');
-  if (badge) badge.style.display = currentAction.name.startsWith('AWA') ? 'block' : 'none';
+  const isAwa = currentAction.name.startsWith('AWA');
+  if (badge) badge.style.display = isAwa ? 'block' : 'none';
+  const dailyBadge = document.getElementById('daily-message-badge');
+  if (dailyBadge) dailyBadge.style.display = isAwa ? 'none' : 'block';
   updateCount();
   resetForm();
   switchTab('form');
@@ -1428,7 +1432,10 @@ function showApp() {
   document.getElementById('topbar-name').textContent = currentAction.name;
   document.getElementById('topbar-date').textContent = currentAction.date + (currentAction.place ? ' · ' + currentAction.place : '');
   const badge = document.getElementById('awareness-badge');
-  if (badge) badge.style.display = currentAction.name.startsWith('AWA') ? 'block' : 'none';
+  const isAwa = currentAction.name.startsWith('AWA');
+  if (badge) badge.style.display = isAwa ? 'block' : 'none';
+  const dailyBadge = document.getElementById('daily-message-badge');
+  if (dailyBadge) dailyBadge.style.display = isAwa ? 'none' : 'block';
   resetForm();
   switchTab('form');
   updateCount();

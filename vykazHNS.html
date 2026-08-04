@@ -712,7 +712,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           Odmítnutý kontakt může být z důvodů:<br>
           1. Agresivita<br>
           2. Kapacita — materiální nebo personální<br>
-          3. Klient požaduje službu, kterou neposkytujeme.
+          3. Klient požaduje službu, kterou neposkytujeme.<br><br>
+          Zvolením možnosti PÁR zadáte identický výkaz do tabulky jednou M jednou Ž.
         </div>
         <div style="margin-bottom:14px;">
           <label style="font-weight:700;font-size:14px;color:var(--text);">Pohlaví</label>
@@ -721,6 +722,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             <label for="p-muz" class="radio-label">♂ Muž</label>
             <input type="radio" name="pohlavi" id="p-zena" value="Ž" class="radio-option">
             <label for="p-zena" class="radio-label">♀ Žena</label>
+            <input type="radio" name="pohlavi" id="p-par" value="Pár" class="radio-option">
+            <label for="p-par" class="radio-label">⚭ PÁR M/Ž</label>
           </div>
         </div>
         <div>
@@ -1657,7 +1660,12 @@ function saveRecord() {
   }
   const multiply = Math.max(1, parseInt(document.getElementById('multiply').value) || 1);
   for (let i = 0; i < multiply; i++) {
-    records.push({ ...r, id: Date.now().toString() + i, ts: new Date().toISOString() });
+    if (r.pohlavi === 'Pár') {
+      records.push({ ...r, pohlavi: 'M', id: Date.now().toString() + i + 'a', ts: new Date().toISOString() });
+      records.push({ ...r, pohlavi: 'Ž', id: Date.now().toString() + i + 'b', ts: new Date().toISOString() });
+    } else {
+      records.push({ ...r, id: Date.now().toString() + i, ts: new Date().toISOString() });
+    }
   }
   saveCurrentAction();
   updateCount();

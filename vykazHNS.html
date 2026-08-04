@@ -674,7 +674,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <div class="topbar-date" id="topbar-date" style="white-space:nowrap;flex-shrink:0;"></div>
     </div>
     <div style="display:flex;align-items:center;width:100%;gap:8px;">
-      <button onclick="switchToNextAction()" style="background:none;border:1px solid rgba(232,255,71,0.6);border-radius:6px;color:rgba(232,255,71,0.6);font-size:11px;font-weight:600;padding:4px 16px;cursor:pointer;white-space:nowrap;flex-shrink:0;">→ Další akce</button>
+      <button onclick="switchToNextAction()" style="background:none;border:1px solid rgba(232,255,71,0.85);border-radius:6px;color:rgba(232,255,71,0.85);font-size:11px;font-weight:600;padding:4px 16px;cursor:pointer;white-space:nowrap;flex-shrink:0;">→ Další akce</button>
       <div id="awareness-badge" style="display:none;padding:3px 8px;border-top:2px solid rgba(255,100,100,0.7);border-bottom:2px solid rgba(255,100,100,0.7);color:rgba(255,100,100,0.9);font-size:10px;font-weight:700;white-space:nowrap;margin:0 auto;">TENTO výkaz je AWARENESS</div>
       <div id="daily-message-badge" style="display:none;padding:3px 8px;border-top:2px solid rgba(71,255,120,0.6);border-bottom:2px solid rgba(71,255,120,0.6);color:rgba(71,255,120,0.9);font-size:10px;font-weight:700;white-space:nowrap;margin:0 auto;">Nezapomínejte rozdávat dotazníky spokojenosti</div>
       <div class="topbar-count" style="margin-left:auto;flex-shrink:0;">Záznamy: <span id="topbar-count">0</span></div>
@@ -703,7 +703,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           <span>Žena — op. kontakt · Ovoce/Voda</span>
         </button>
       </div>
-      <div class="form-section">
+      <div class="form-section" id="section-01">
         <div class="form-section-title" style="display:flex;align-items:center;justify-content:space-between;">
           <span>01 — Pohlaví &amp; Typ kontaktu</span>
           <span onclick="const h=document.getElementById('help-typ');h.style.display=h.style.display==='none'?'block':'none';" style="width:22px;height:22px;border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--text2);flex-shrink:0;">?</span>
@@ -1055,7 +1055,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--text2);margin-bottom:4px;">SOUČTOVÝ REPORT</div>
           <div id="report-title" style="font-size:22px;font-weight:600;"></div>
         </div>
-        <button class="btn" style="background:rgba(232,255,71,0.15);border:1px solid var(--accent);color:var(--accent);font-weight:700;" onclick="exportReportExcel()">↓ Export reportu (Excel)</button>
+        <button class="btn" style="background:rgba(232,255,71,0.15);border:1px solid var(--accent);color:var(--accent);font-weight:700;flex-direction:column;gap:2px;" onclick="exportReportExcel()">
+          <span>↓ Export reportu (Excel)</span>
+          <span style="font-size:10px;font-weight:400;opacity:0.7;">exportujte ihned po akci a odešlete hlavnímu pracovníkovi k uložení</span>
+        </button>
       </div>
       <div id="report-content"></div>
     </div>
@@ -1631,9 +1634,11 @@ function readForm() {
 function saveRecord() {
   const r = readForm();
   if (!r.pohlavi || !r.typ) {
-    if (r.pohlavi && !r.typ) { showToast('Chybí typ kontaktu — klient, opakovaný nebo odmítnutý.'); return; }
-    if (!r.pohlavi && r.typ) { showToast('Chybí pohlaví.'); return; }
+    const target = document.getElementById('section-01');
+    if (r.pohlavi && !r.typ) { showToast('Chybí typ kontaktu — klient, opakovaný nebo odmítnutý.'); if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+    if (!r.pohlavi && r.typ) { showToast('Chybí pohlaví.'); if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
     showToast('Vyplň pohlaví a typ kontaktu.');
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
   if (r.typ !== 'Odmítnutý') {

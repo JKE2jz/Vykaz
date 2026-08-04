@@ -1897,7 +1897,7 @@ function eToggle(field, val) {
   window._eToggles[field] = val === 'yes';
   document.getElementById('e'+field+'-yes').classList.toggle('active', val === 'yes');
   document.getElementById('e'+field+'-no').classList.toggle('active', val === 'no');
-  const det = document.getElementById('ee'+field+'-detail');
+  const det = document.getElementById('e'+field+'-detail');
   if (det) det.classList.toggle('visible', val === 'yes');
 }
 
